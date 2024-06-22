@@ -1,0 +1,48 @@
+
+╔═══════════════════════ nwo ════════════════════════╗
+║                                                    ║
+║                   IP: 80.5.3.1                     ║
+║                   Rooted: true                     ║
+║                 Backdoored: false                  ║
+║                                                    ║
+║                 Connected: false                   ║
+║                     Cores: 1                       ║
+║                 Organization: NWO                  ║
+║                Is Purchased: false                 ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║                   Max RAM: 0 GB                    ║
+║                   Free RAM: 0 GB                   ║
+║                   Used RAM: 0 GB                   ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║                FTP Port Open: true                 ║
+║               HTTP Port Open: true                 ║
+║               SMTP Port Open: true                 ║
+║                SQL Port Open: true                 ║
+║                SSH Port Open: true                 ║
+║      Number of Ports Required to Backdoor: 5       ║
+║              Number of Open Ports: 5               ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║                   Max RAM: 0 GB                    ║
+║                   Used RAM: 0 GB                   ║
+║                   Free RAM: 0 GB                   ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║              Base Hack Difficulty: 99              ║
+║            Minimum Hack Difficulty: 33             ║
+║                Hack Difficulty: 99                 ║
+║            Required Hacking Level: 1031            ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║    Maximum Money Possible: $824,211,350,625.00     ║
+║      Max Money Available: $32,968,454,025.00       ║
+║              Server Growth Rate: 0.8%              ║
+║                                                    ║
+╚════════════════════════════════════════════════════╝

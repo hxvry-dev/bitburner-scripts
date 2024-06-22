@@ -1,0 +1,48 @@
+
+╔════════════════ applied-energetics ════════════════╗
+║                                                    ║
+║                   IP: 18.4.5.7                     ║
+║                   Rooted: true                     ║
+║                 Backdoored: false                  ║
+║                                                    ║
+║                 Connected: false                   ║
+║                     Cores: 1                       ║
+║         Organization: Applied Energetics           ║
+║                Is Purchased: false                 ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║                   Max RAM: 0 GB                    ║
+║                   Free RAM: 0 GB                   ║
+║                   Used RAM: 0 GB                   ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║                FTP Port Open: true                 ║
+║               HTTP Port Open: true                 ║
+║               SMTP Port Open: true                 ║
+║               SQL Port Open: false                 ║
+║                SSH Port Open: true                 ║
+║      Number of Ports Required to Backdoor: 4       ║
+║              Number of Open Ports: 4               ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║                   Max RAM: 0 GB                    ║
+║                   Used RAM: 0 GB                   ║
+║                   Free RAM: 0 GB                   ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║              Base Hack Difficulty: 68              ║
+║            Minimum Hack Difficulty: 23             ║
+║                Hack Difficulty: 68                 ║
+║            Required Hacking Level: 782             ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║     Maximum Money Possible: $20,655,489,075.00     ║
+║        Max Money Available: $826,219,563.00        ║
+║              Server Growth Rate: 0.7%              ║
+║                                                    ║
+╚════════════════════════════════════════════════════╝

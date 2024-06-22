@@ -1,0 +1,48 @@
+
+╔═════════════════════ aerocorp ═════════════════════╗
+║                                                    ║
+║                   IP: 81.6.5.1                     ║
+║                   Rooted: true                     ║
+║                 Backdoored: false                  ║
+║                                                    ║
+║                 Connected: false                   ║
+║                     Cores: 1                       ║
+║              Organization: AeroCorp                ║
+║                Is Purchased: false                 ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║                   Max RAM: 0 GB                    ║
+║                   Free RAM: 0 GB                   ║
+║                   Used RAM: 0 GB                   ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║                FTP Port Open: true                 ║
+║               HTTP Port Open: true                 ║
+║               SMTP Port Open: true                 ║
+║                SQL Port Open: true                 ║
+║                SSH Port Open: true                 ║
+║      Number of Ports Required to Backdoor: 5       ║
+║              Number of Open Ports: 5               ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║                   Max RAM: 0 GB                    ║
+║                   Used RAM: 0 GB                   ║
+║                   Free RAM: 0 GB                   ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║              Base Hack Difficulty: 90              ║
+║            Minimum Hack Difficulty: 30             ║
+║                Hack Difficulty: 90                 ║
+║            Required Hacking Level: 913             ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║     Maximum Money Possible: $25,508,295,800.00     ║
+║       Max Money Available: $1,020,331,832.00       ║
+║             Server Growth Rate: 0.65%              ║
+║                                                    ║
+╚════════════════════════════════════════════════════╝

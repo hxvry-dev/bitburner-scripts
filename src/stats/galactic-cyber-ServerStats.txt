@@ -1,0 +1,48 @@
+
+╔══════════════════ galactic-cyber ══════════════════╗
+║                                                    ║
+║                   IP: 47.3.8.3                     ║
+║                   Rooted: true                     ║
+║                 Backdoored: false                  ║
+║                                                    ║
+║                 Connected: false                   ║
+║                     Cores: 1                       ║
+║        Organization: Galactic Cybersystems         ║
+║                Is Purchased: false                 ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║                   Max RAM: 0 GB                    ║
+║                   Free RAM: 0 GB                   ║
+║                   Used RAM: 0 GB                   ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║                FTP Port Open: true                 ║
+║               HTTP Port Open: true                 ║
+║               SMTP Port Open: true                 ║
+║                SQL Port Open: true                 ║
+║                SSH Port Open: true                 ║
+║      Number of Ports Required to Backdoor: 5       ║
+║              Number of Open Ports: 5               ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║                   Max RAM: 0 GB                    ║
+║                   Used RAM: 0 GB                   ║
+║                   Free RAM: 0 GB                   ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║              Base Hack Difficulty: 62              ║
+║            Minimum Hack Difficulty: 21             ║
+║                Hack Difficulty: 62                 ║
+║            Required Hacking Level: 863             ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║     Maximum Money Possible: $18,873,403,650.00     ║
+║        Max Money Available: $754,936,146.00        ║
+║              Server Growth Rate: 0.8%              ║
+║                                                    ║
+╚════════════════════════════════════════════════════╝

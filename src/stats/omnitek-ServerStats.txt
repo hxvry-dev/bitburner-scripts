@@ -1,0 +1,48 @@
+
+╔═════════════════════ omnitek ══════════════════════╗
+║                                                    ║
+║                   IP: 44.4.4.0                     ║
+║                   Rooted: true                     ║
+║                 Backdoored: false                  ║
+║                                                    ║
+║                 Connected: false                   ║
+║                     Cores: 1                       ║
+║        Organization: OmniTek Incorporated          ║
+║                Is Purchased: false                 ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║                Max RAM: 256.000 GB                 ║
+║                 Free RAM: 0.500 GB                 ║
+║                Used RAM: 255.500 GB                ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║                FTP Port Open: true                 ║
+║               HTTP Port Open: true                 ║
+║               SMTP Port Open: true                 ║
+║                SQL Port Open: true                 ║
+║                SSH Port Open: true                 ║
+║      Number of Ports Required to Backdoor: 5       ║
+║              Number of Open Ports: 5               ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║                Max RAM: 256.000 GB                 ║
+║                Used RAM: 255.500 GB                ║
+║                 Free RAM: 0.500 GB                 ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║              Base Hack Difficulty: 97              ║
+║            Minimum Hack Difficulty: 32             ║
+║                Hack Difficulty: 97                 ║
+║            Required Hacking Level: 956             ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║    Maximum Money Possible: $499,549,054,225.00     ║
+║      Max Money Available: $19,981,962,169.00       ║
+║             Server Growth Rate: 0.95%              ║
+║                                                    ║
+╚════════════════════════════════════════════════════╝

@@ -1,0 +1,48 @@
+
+╔════════════════════ unitalife ═════════════════════╗
+║                                                    ║
+║                   IP: 52.9.1.1                     ║
+║                   Rooted: true                     ║
+║                 Backdoored: false                  ║
+║                                                    ║
+║                 Connected: false                   ║
+║                     Cores: 1                       ║
+║           Organization: UnitaLife Group            ║
+║                Is Purchased: false                 ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║                 Max RAM: 16.000 GB                 ║
+║                 Free RAM: 0.250 GB                 ║
+║                Used RAM: 15.750 GB                 ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║                FTP Port Open: true                 ║
+║               HTTP Port Open: true                 ║
+║               SMTP Port Open: true                 ║
+║               SQL Port Open: false                 ║
+║                SSH Port Open: true                 ║
+║      Number of Ports Required to Backdoor: 4       ║
+║              Number of Open Ports: 4               ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║                 Max RAM: 16.000 GB                 ║
+║                Used RAM: 15.750 GB                 ║
+║                 Free RAM: 0.250 GB                 ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║              Base Hack Difficulty: 77              ║
+║            Minimum Hack Difficulty: 26             ║
+║                Hack Difficulty: 77                 ║
+║            Required Hacking Level: 816             ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║     Maximum Money Possible: $25,592,270,950.00     ║
+║       Max Money Available: $1,023,690,838.00       ║
+║             Server Growth Rate: 0.78%              ║
+║                                                    ║
+╚════════════════════════════════════════════════════╝

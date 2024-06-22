@@ -1,0 +1,48 @@
+
+╔════════════════════ summit-uni ════════════════════╗
+║                                                    ║
+║                   IP: 17.0.6.2                     ║
+║                   Rooted: true                     ║
+║                 Backdoored: false                  ║
+║                                                    ║
+║                 Connected: false                   ║
+║                     Cores: 1                       ║
+║          Organization: Summit University           ║
+║                Is Purchased: false                 ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║                 Max RAM: 16.000 GB                 ║
+║                 Free RAM: 0.250 GB                 ║
+║                Used RAM: 15.750 GB                 ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║                FTP Port Open: true                 ║
+║               HTTP Port Open: false                ║
+║               SMTP Port Open: true                 ║
+║               SQL Port Open: false                 ║
+║                SSH Port Open: true                 ║
+║      Number of Ports Required to Backdoor: 3       ║
+║              Number of Open Ports: 3               ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║                 Max RAM: 16.000 GB                 ║
+║                Used RAM: 15.750 GB                 ║
+║                 Free RAM: 0.250 GB                 ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║              Base Hack Difficulty: 52              ║
+║            Minimum Hack Difficulty: 17             ║
+║                Hack Difficulty: 52                 ║
+║            Required Hacking Level: 442             ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║     Maximum Money Possible: $6,206,057,600.00      ║
+║        Max Money Available: $248,242,304.00        ║
+║             Server Growth Rate: 0.41%              ║
+║                                                    ║
+╚════════════════════════════════════════════════════╝

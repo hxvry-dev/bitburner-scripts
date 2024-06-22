@@ -1,0 +1,48 @@
+
+╔═══════════════════ run4theh111z ═══════════════════╗
+║                                                    ║
+║                   IP: 59.5.2.1                     ║
+║                   Rooted: true                     ║
+║                 Backdoored: false                  ║
+║                                                    ║
+║                 Connected: false                   ║
+║                     Cores: 1                       ║
+║             Organization: The Runners              ║
+║                Is Purchased: false                 ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║                Max RAM: 128.000 GB                 ║
+║                Free RAM: 128.000 GB                ║
+║                   Used RAM: 0 GB                   ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║                FTP Port Open: true                 ║
+║               HTTP Port Open: true                 ║
+║               SMTP Port Open: true                 ║
+║               SQL Port Open: false                 ║
+║                SSH Port Open: true                 ║
+║      Number of Ports Required to Backdoor: 4       ║
+║              Number of Open Ports: 4               ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║                Max RAM: 128.000 GB                 ║
+║                   Used RAM: 0 GB                   ║
+║                Free RAM: 128.000 GB                ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║              Base Hack Difficulty: 1               ║
+║             Minimum Hack Difficulty: 1             ║
+║                 Hack Difficulty: 1                 ║
+║            Required Hacking Level: 547             ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║             Maximum Money Possible: 0              ║
+║               Max Money Available: 0               ║
+║             Server Growth Rate: 0.01%              ║
+║                                                    ║
+╚════════════════════════════════════════════════════╝

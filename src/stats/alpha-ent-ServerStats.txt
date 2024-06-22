@@ -1,0 +1,48 @@
+
+╔════════════════════ alpha-ent ═════════════════════╗
+║                                                    ║
+║                   IP: 84.9.6.0                     ║
+║                   Rooted: true                     ║
+║                 Backdoored: false                  ║
+║                                                    ║
+║                 Connected: false                   ║
+║                     Cores: 1                       ║
+║          Organization: Alpha Enterprises           ║
+║                Is Purchased: false                 ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║                Max RAM: 128.000 GB                 ║
+║                 Free RAM: 0.250 GB                 ║
+║                Used RAM: 127.750 GB                ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║                FTP Port Open: true                 ║
+║               HTTP Port Open: true                 ║
+║               SMTP Port Open: true                 ║
+║               SQL Port Open: false                 ║
+║                SSH Port Open: true                 ║
+║      Number of Ports Required to Backdoor: 4       ║
+║              Number of Open Ports: 4               ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║                Max RAM: 128.000 GB                 ║
+║                Used RAM: 127.750 GB                ║
+║                 Free RAM: 0.250 GB                 ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║              Base Hack Difficulty: 62              ║
+║            Minimum Hack Difficulty: 21             ║
+║                Hack Difficulty: 62                 ║
+║            Required Hacking Level: 510             ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║     Maximum Money Possible: $16,007,222,725.00     ║
+║        Max Money Available: $640,288,909.00        ║
+║             Server Growth Rate: 0.54%              ║
+║                                                    ║
+╚════════════════════════════════════════════════════╝

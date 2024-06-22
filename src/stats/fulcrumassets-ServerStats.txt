@@ -1,0 +1,48 @@
+
+╔══════════════════ fulcrumassets ═══════════════════╗
+║                                                    ║
+║                   IP: 64.3.6.3                     ║
+║                   Rooted: true                     ║
+║                 Backdoored: false                  ║
+║                                                    ║
+║                 Connected: false                   ║
+║                     Cores: 1                       ║
+║        Organization: Fulcrum Technologies          ║
+║                Is Purchased: false                 ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║                   Max RAM: 0 GB                    ║
+║                   Free RAM: 0 GB                   ║
+║                   Used RAM: 0 GB                   ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║                FTP Port Open: true                 ║
+║               HTTP Port Open: true                 ║
+║               SMTP Port Open: true                 ║
+║                SQL Port Open: true                 ║
+║                SSH Port Open: true                 ║
+║      Number of Ports Required to Backdoor: 5       ║
+║              Number of Open Ports: 5               ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║                   Max RAM: 0 GB                    ║
+║                   Used RAM: 0 GB                   ║
+║                   Free RAM: 0 GB                   ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║              Base Hack Difficulty: 99              ║
+║            Minimum Hack Difficulty: 33             ║
+║                Hack Difficulty: 99                 ║
+║            Required Hacking Level: 1306            ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║       Maximum Money Possible: $25,000,000.00       ║
+║         Max Money Available: $1,000,000.00         ║
+║             Server Growth Rate: 0.01%              ║
+║                                                    ║
+╚════════════════════════════════════════════════════╝

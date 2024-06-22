@@ -1,0 +1,48 @@
+
+╔═════════════════════ nova-med ═════════════════════╗
+║                                                    ║
+║                   IP: 34.9.0.5                     ║
+║                   Rooted: true                     ║
+║                 Backdoored: false                  ║
+║                                                    ║
+║                 Connected: false                   ║
+║                     Cores: 1                       ║
+║            Organization: Nova Medical              ║
+║                Is Purchased: false                 ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║                   Max RAM: 0 GB                    ║
+║                   Free RAM: 0 GB                   ║
+║                   Used RAM: 0 GB                   ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║                FTP Port Open: true                 ║
+║               HTTP Port Open: true                 ║
+║               SMTP Port Open: true                 ║
+║               SQL Port Open: false                 ║
+║                SSH Port Open: true                 ║
+║      Number of Ports Required to Backdoor: 4       ║
+║              Number of Open Ports: 4               ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║                   Max RAM: 0 GB                    ║
+║                   Used RAM: 0 GB                   ║
+║                   Free RAM: 0 GB                   ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║              Base Hack Difficulty: 74              ║
+║            Minimum Hack Difficulty: 25             ║
+║                Hack Difficulty: 74                 ║
+║            Required Hacking Level: 791             ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║     Maximum Money Possible: $30,653,069,875.00     ║
+║       Max Money Available: $1,226,122,795.00       ║
+║             Server Growth Rate: 0.75%              ║
+║                                                    ║
+╚════════════════════════════════════════════════════╝

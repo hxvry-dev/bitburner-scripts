@@ -1,0 +1,48 @@
+
+╔════════════════════ kuai-gong ═════════════════════╗
+║                                                    ║
+║                   IP: 25.1.9.8                     ║
+║                   Rooted: true                     ║
+║                 Backdoored: false                  ║
+║                                                    ║
+║                 Connected: false                   ║
+║                     Cores: 1                       ║
+║       Organization: KuaiGong International         ║
+║                Is Purchased: false                 ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║                   Max RAM: 0 GB                    ║
+║                   Free RAM: 0 GB                   ║
+║                   Used RAM: 0 GB                   ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║                FTP Port Open: true                 ║
+║               HTTP Port Open: true                 ║
+║               SMTP Port Open: true                 ║
+║                SQL Port Open: true                 ║
+║                SSH Port Open: true                 ║
+║      Number of Ports Required to Backdoor: 5       ║
+║              Number of Open Ports: 5               ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║                   Max RAM: 0 GB                    ║
+║                   Used RAM: 0 GB                   ║
+║                   Free RAM: 0 GB                   ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║              Base Hack Difficulty: 95              ║
+║            Minimum Hack Difficulty: 32             ║
+║                Hack Difficulty: 95                 ║
+║            Required Hacking Level: 1172            ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║    Maximum Money Possible: $709,287,143,350.00     ║
+║      Max Money Available: $28,371,485,734.00       ║
+║             Server Growth Rate: 0.99%              ║
+║                                                    ║
+╚════════════════════════════════════════════════════╝

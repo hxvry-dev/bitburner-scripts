@@ -1,0 +1,48 @@
+
+╔════════════════════ microdyne ═════════════════════╗
+║                                                    ║
+║                   IP: 13.5.7.1                     ║
+║                   Rooted: true                     ║
+║                 Backdoored: false                  ║
+║                                                    ║
+║                 Connected: false                   ║
+║                     Cores: 1                       ║
+║       Organization: Microdyne Technologies         ║
+║                Is Purchased: false                 ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║                 Max RAM: 64.000 GB                 ║
+║                 Free RAM: 1.000 GB                 ║
+║                Used RAM: 63.000 GB                 ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║                FTP Port Open: true                 ║
+║               HTTP Port Open: true                 ║
+║               SMTP Port Open: true                 ║
+║                SQL Port Open: true                 ║
+║                SSH Port Open: true                 ║
+║      Number of Ports Required to Backdoor: 5       ║
+║              Number of Open Ports: 5               ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║                 Max RAM: 64.000 GB                 ║
+║                Used RAM: 63.000 GB                 ║
+║                 Free RAM: 1.000 GB                 ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║              Base Hack Difficulty: 71              ║
+║            Minimum Hack Difficulty: 24             ║
+║                Hack Difficulty: 71                 ║
+║            Required Hacking Level: 853             ║
+║                                                    ║
+╠════════════════════════════════════════════════════╣
+║                                                    ║
+║     Maximum Money Possible: $14,870,164,600.00     ║
+║        Max Money Available: $594,806,584.00        ║
+║              Server Growth Rate: 0.9%              ║
+║                                                    ║
+╚════════════════════════════════════════════════════╝
