@@ -149,3 +149,4 @@ dist
 .pnp.*
 
 NetscriptDefinitions.d.ts
+./updateDefs/updateDefs.js
