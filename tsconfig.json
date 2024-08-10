@@ -17,8 +17,8 @@
 		"paths": {
 			"@/*": ["./src/*"],
 			"/src/*": ["./src/*"],
-			"@ns": ["defs/NetscriptDefinitions.d.ts"]
+			"@ns": ["NetscriptDefinitions.d.ts"]
 		}
 	},
-	"include": ["src/**/*.ts", "src/**/*.js", "defs/NetscriptDefinitions.d.ts", "vite.config.ts", "vite.config.js"]
+	"include": ["src/**/*.ts", "src/**/*.js", "./NetscriptDefinitions.d.ts", "vite.config.ts", "vite.config.js"]
 }
