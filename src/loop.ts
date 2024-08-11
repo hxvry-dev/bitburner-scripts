@@ -4,8 +4,8 @@ import { IServer, Queue } from './util/server_v2';
 export async function main(ns: NS): Promise<void> {
 	ns.disableLog('ALL');
 	ns.disableLog('exec');
-	const server: IServer = new IServer(ns, ns.getHostname());
-	ns.tprint(server.popServerOffOfQueue(server));
+	const server: IServer = new IServer(ns, 'home');
+	server.generateServerReport(ns);
 	/*
 
         Steps to hacking a server and profiting:
