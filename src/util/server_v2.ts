@@ -169,7 +169,7 @@ export class IServer {
 		return queue.removeElem(server);
 	}
 	generateServerReport(ns: NS) {
-		let output: string = `
+		const output: string = `
 
 | ${pad('', 52, '-')} |
 | ${pad(' Generated Server Report For: ' + this.info.serverInfo.hostname + ' ', 52, '-')} |
