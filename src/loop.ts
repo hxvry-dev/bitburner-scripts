@@ -5,7 +5,6 @@ export async function main(ns: NS): Promise<void> {
 	ns.disableLog('ALL');
 	ns.disableLog('exec');
 	const server: IServer = new IServer(ns, 'home');
-	server.generateServerReport(ns);
 	/*
 
         Steps to hacking a server and profiting:

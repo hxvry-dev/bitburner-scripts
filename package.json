@@ -3,6 +3,7 @@
 	"version": "0.0.1",
 	"scripts": {
 		"preinstall": "tsc ./updateDefs && node ./updateDefs && rm ./updateDefs.js",
+		"prettier": "prettier . --write",
 		"dev": "viteburner"
 	},
 	"author": "Schmeng",
