@@ -6,17 +6,7 @@ import { generateServerReport } from './util/serverReport';
 export async function main(ns: NS): Promise<void> {
 	ns.disableLog('ALL');
 	ns.disableLog('exec');
-	/*
 
-        Steps to hacking a server and profiting:
-
-        1. Root the server
-        1a. Run all 5 hack scripts.
-        2. Root the Server, creating a v2 IServer in the process.
-        3. Copy hack files over to that server, start the loop.
-        4. ???
-        5. Profit?
-        */
 	const rooted_hosts: string[] = [];
 	while (true) {
 		const servers: IServer[] = listIServers(ns);
