@@ -73,28 +73,6 @@ interface InfoDump {
 	moneyInfo: MoneyInformation;
 }
 
-export class Queue extends Array {
-	add(val: string | IServer) {
-		this.push(val);
-	}
-	remove() {
-		return this.shift();
-	}
-	removeElem(elem: string | IServer) {
-		this.forEach((item, index) => {
-			if (item === elem) {
-				this.splice(index, 1);
-			}
-		});
-	}
-	peek() {
-		return this[0];
-	}
-	isEmpty() {
-		return this.length === 0;
-	}
-}
-
 export class IServer {
 	constructor(public ns: NS, public host: string) {
 		this.ns = ns;
