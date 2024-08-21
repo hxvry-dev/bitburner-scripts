@@ -1,20 +1,60 @@
 import { NS } from '@ns';
-import { IServer, Queue } from './util/server_v2';
+import { IServer } from './util/server_v2';
+import { copy, exec, listIServers, scriptNames } from './util/util_v2';
+import { generateServerReport } from './util/serverReport';
 
 export async function main(ns: NS): Promise<void> {
 	ns.disableLog('ALL');
 	ns.disableLog('exec');
-	const server: IServer = new IServer(ns, 'home');
 	/*
 
         Steps to hacking a server and profiting:
 
         1. Root the server
         1a. Run all 5 hack scripts.
-        1aa. If a script doesn't eixst for some reason, buy it.
         2. Root the Server, creating a v2 IServer in the process.
         3. Copy hack files over to that server, start the loop.
         4. ???
         5. Profit?
         */
+	const rooted_hosts: string[] = [];
+	while (true) {
+		const servers: IServer[] = listIServers(ns);
+		void copy(ns, servers);
+		for (const server of servers) {
+			if (server.generalInfo.hostname !== 'home') {
+				if (server.securityInfo.requiredHackingSkill! <= ns.getHackingLevel()) {
+					if (server.securityInfo.hackDifficulty! > server.securityInfo.minDifficulty!) {
+						const threads: number = server.threadCount(1.75);
+						if (threads >= 1) {
+							await exec(ns, server.generalInfo.hostname, scriptNames.weaken, threads);
+						}
+					} else if (server.moneyInfo.moneyAvailable! <= server.moneyInfo.moneyMax!) {
+						const threads: number = server.threadCount(1.75);
+						if (threads >= 1) {
+							await exec(ns, server.generalInfo.hostname, scriptNames.grow, threads);
+						}
+					} else {
+						const threads: number = server.threadCount(1.7);
+						if (threads >= 1) {
+							await exec(ns, server.generalInfo.hostname, scriptNames.hack, threads);
+						}
+					}
+				} else {
+					if (!server.generalInfo.hasAdminRights) {
+						try {
+							server.root();
+							if (server.generalInfo.hasAdminRights) {
+								rooted_hosts.push(server.generalInfo.hostname);
+								await generateServerReport(ns, true, server, true);
+							}
+						} catch (e) {
+							ns.print(e);
+						}
+					}
+				}
+			}
+		}
+		await ns.sleep(100);
+	}
 }

@@ -2,11 +2,7 @@ import { NS } from '@ns';
 import { IServer } from './server_v2';
 import { listIServers, pad } from './util_v2';
 
-export async function main(ns: NS): Promise<void> {
-	const write: boolean = ns.args[0] as boolean;
-	const servers: IServer[] = await listIServers(ns);
-	servers.forEach((server) => {
-		const output: string = `
+export const serverReportSlug = (server: IServer) => `
 
 | ${pad('', 52, '-')} |
 | ${pad(' Generated Server Report For: ' + server.generalInfo.hostname + ' ', 52, '-')} |
@@ -60,13 +56,35 @@ export async function main(ns: NS): Promise<void> {
 | ${pad(' Max Money Available: ' + server.moneyInfo.moneyMax + ' ', 52, '-')} |
 | ${pad(' Money Available: ' + server.moneyInfo.moneyAvailable + ' ', 52, '-')} |
 | ${pad(' Server Growth: ' + server.moneyInfo.serverGrowth + ' ', 52, '-')} |`;
+
+export async function generateServerReport(
+	ns: NS,
+	singleServer?: boolean,
+	server?: IServer,
+	write: boolean = false,
+): Promise<void> {
+	const servers: IServer[] = listIServers(ns);
+	if (singleServer && server) {
+		const output = serverReportSlug(server);
 		if (write) {
 			if (server.generalInfo.hostname == '.') {
 				return ns.write(`stats/PERIOD-${server.generalInfo.hostname}-ServerStats.txt`, output, 'w');
 			}
 			return ns.write(`stats/${server.generalInfo.hostname}-ServerStats.txt`, output, 'w');
 		} else {
-			return ns.tprint(output);
+			return ns.print(output);
 		}
-	});
+	} else {
+		servers.forEach((server) => {
+			const output = serverReportSlug(server);
+			if (write) {
+				if (server.generalInfo.hostname == '.') {
+					return ns.write(`stats/PERIOD-${server.generalInfo.hostname}-ServerStats.txt`, output, 'w');
+				}
+				return ns.write(`stats/${server.generalInfo.hostname}-ServerStats.txt`, output, 'w');
+			} else {
+				return ns.print(output);
+			}
+		});
+	}
 }

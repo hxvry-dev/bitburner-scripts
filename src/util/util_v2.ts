@@ -2,17 +2,46 @@ import { NS } from '@ns';
 import { IServer } from './server_v2';
 
 /**
+ *
+ * @param ns Netscript API
+ * @param scriptName The name of the script being run against the `target` server
+ * @param hostname The hostname of the server running the script
+ * @param threads The number of threads being used to run the script
+ * @param target The target? server that the script is attacking/growing/weakening
+ */
+export async function exec(
+	ns: NS,
+	hostname: string,
+	scriptName: string,
+	threadCount: number,
+	target: string = 'n00dles',
+): Promise<void> {
+	try {
+		ns.exec(scriptName, hostname, threadCount, target);
+	} catch {
+		ns.print(`
+        Something went wrong, waiting a cycle and trying again.
+        Here's some info on what happened:
+        
+        Hostname: ${hostname}
+        Thread count attempted: ${threadCount}
+        Script trying to be run: ${scriptName}
+        `);
+	}
+}
+
+/**
  * Copies the specified hacking scripts to the target server
  * @param ns Netscript API
  * @param serversToVisit Array of server hostnames to copy files to
  */
 export function copy(ns: NS, serversToVisit: IServer[]): void {
-	const scripts = ['scripts/_grow.js', 'scripts/_hack.js', 'scripts/_weaken.js'];
+	const scripts = ['scripts/grow_v2.js', 'scripts/hack_v2.js', 'scripts/weaken_v2.js'];
 
 	for (const server of serversToVisit) {
-		const growExists: boolean = ns.fileExists('scripts/_grow.js', server.generalInfo.hostname);
-		const hackExists: boolean = ns.fileExists('scripts/_hack.js', server.generalInfo.hostname);
-		const weakenExists: boolean = ns.fileExists('scripts/_weaken.js', server.generalInfo.hostname);
+		const growExists: boolean = ns.fileExists('scripts/grow_v2.js', server.generalInfo.hostname);
+		const hackExists: boolean = ns.fileExists('scripts/hack_v2.js', server.generalInfo.hostname);
+		const weakenExists: boolean = ns.fileExists('scripts/weaken_v2.js', server.generalInfo.hostname);
 		if (!growExists) {
 			ns.scp(scripts[0], server.generalInfo.hostname, 'home');
 		}
@@ -56,43 +85,13 @@ export function listServers(ns: NS, current: string = 'home', visited = new Set<
  * @param ns Netscript API
  * @returns Array of IServers
  */
-export async function listIServers(ns: NS): Promise<IServer[]> {
+export function listIServers(ns: NS): IServer[] {
 	const servers: string[] = listServers(ns);
 	const data: IServer[] = [];
 	for (const server of servers) {
 		data.push(new IServer(ns, server));
 	}
 	return data;
-}
-
-/**
- * Generates a random Server name
- * @param length Total length of the generated Slug
- * @returns The generated Slug
- */
-export function generateServerSlug(length?: number): string {
-	const chars: string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
-	let result: string = '';
-	if (!length || length < 5) {
-		length = 5;
-	}
-	for (let i = 0; i < length; i++) {
-		result += chars.charAt(Math.floor(Math.random() * chars.length));
-	}
-	return result;
-}
-
-/**
- * Deletes all Player-Purchased Servers
- * @param ns Netscript API
- */
-export async function scrub(ns: NS): Promise<void> {
-	const servers: string[] = ns.getPurchasedServers();
-
-	servers.forEach((server) => {
-		ns.killall(server);
-		ns.deleteServer(server);
-	});
 }
 
 /**
@@ -106,3 +105,9 @@ export const pad = (str: string, length: number, separator: string) =>
 	str.padStart((str.length + length) / 2, separator).padEnd(length, separator);
 
 export const hackPrograms = ['BruteSSH.exe', 'FTPCrack.exe', 'relaySMTP.exe', 'HTTPWorm.exe', 'SQLInject.exe'];
+
+export const scriptNames = {
+	hack: 'scripts/hack_v2.js',
+	weaken: 'scripts/weaken_v2.js',
+	grow: 'scripts/grow_v2.js',
+};

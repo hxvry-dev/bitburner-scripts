@@ -101,7 +101,10 @@ export class IServer {
 		this.host = host;
 	}
 	get data(): Server {
-		return this.ns.getServer();
+		return this.ns.getServer(this.host);
+	}
+	get hostname(): string {
+		return this.data.hostname;
 	}
 	get generalInfo(): ServerInformation {
 		return {
@@ -157,9 +160,44 @@ export class IServer {
 			moneyInfo: this.moneyInfo,
 		};
 	}
+	/**
+	 * Gets the amount of possible threads for a specific hacking script
+	 * @param scriptRAM Required amount of free RAM needed to execute a script
+	 * @returns The maximum amount of threads possible given the constraints
+	 */
 	threadCount(scriptRAM: number): number {
 		return Math.floor(this.RAMInfo.freeRam / scriptRAM);
 	}
+	/**
+	 * Deletes all Player-Purchased Servers
+	 */
+	scrub(): void {
+		const servers: string[] = this.ns.getPurchasedServers();
+
+		servers.forEach((server) => {
+			this.ns.killall(server);
+			this.ns.deleteServer(server);
+		});
+	}
+	/**
+	 * Generates a random Server name
+	 * @param length Total length of the generated Slug
+	 * @returns The generated Slug
+	 */
+	generateServerSlug(length?: number): string {
+		const chars: string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
+		let result: string = '';
+		if (!length || length < 5) {
+			length = 5;
+		}
+		for (let i = 0; i < length; i++) {
+			result += chars.charAt(Math.floor(Math.random() * chars.length));
+		}
+		return result;
+	}
+	/**
+	 * Attempts to gain access to a server by using any/all hacking methods available to the player
+	 */
 	root(): void {
 		try {
 			this.ns.nuke(this.data.hostname);
@@ -172,6 +210,7 @@ export class IServer {
 			this.ns.relaysmtp(this.data.hostname);
 			this.ns.httpworm(this.data.hostname);
 			this.ns.sqlinject(this.data.hostname);
+			this.ns.nuke(this.data.hostname);
 		} catch (e) {
 			this.ns.print(e);
 		}
