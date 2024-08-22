@@ -158,22 +158,6 @@ export class IServer {
 		});
 	}
 	/**
-	 * Generates a random Server name
-	 * @param length Total length of the generated Slug
-	 * @returns The generated Slug
-	 */
-	generateServerSlug(length?: number): string {
-		const chars: string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
-		let result: string = '';
-		if (!length || length < 5) {
-			length = 5;
-		}
-		for (let i = 0; i < length; i++) {
-			result += chars.charAt(Math.floor(Math.random() * chars.length));
-		}
-		return result;
-	}
-	/**
 	 * Attempts to gain access to a server by using any/all hacking methods available to the player
 	 */
 	root(): void {

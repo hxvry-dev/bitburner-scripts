@@ -111,3 +111,19 @@ export const scriptNames = {
 	weaken: 'scripts/weaken_v2.js',
 	grow: 'scripts/grow_v2.js',
 };
+/**
+ * Generates a random Server name
+ * @param length Total length of the generated Slug
+ * @returns The generated Slug
+ */
+export function generateServerSlug(length?: number): string {
+	const chars: string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
+	let result: string = '';
+	if (!length || length < 5) {
+		length = 5;
+	}
+	for (let i = 0; i < length; i++) {
+		result += chars.charAt(Math.floor(Math.random() * chars.length));
+	}
+	return result;
+}
