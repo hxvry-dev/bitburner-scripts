@@ -9,15 +9,9 @@ import { IServer } from './server_v2';
  * @param threads The number of threads being used to run the script
  * @param target The target? server that the script is attacking/growing/weakening
  */
-export async function exec(
-	ns: NS,
-	hostname: string,
-	scriptName: string,
-	threadCount: number,
-	target: string = 'n00dles',
-): Promise<void> {
+export function exec(ns: NS, hostname: string, scriptName: string, threadCount: number): void {
 	try {
-		ns.exec(scriptName, hostname, threadCount, target);
+		ns.exec(scriptName, hostname, threadCount, 'n00dles');
 	} catch {
 		ns.print(`
         Something went wrong, waiting a cycle and trying again.

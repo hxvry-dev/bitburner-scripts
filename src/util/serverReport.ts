@@ -57,12 +57,7 @@ export const serverReportSlug = (server: IServer) => `
 | ${pad(' Money Available: ' + server.moneyInfo.moneyAvailable + ' ', 52, '-')} |
 | ${pad(' Server Growth: ' + server.moneyInfo.serverGrowth + ' ', 52, '-')} |`;
 
-export async function generateServerReport(
-	ns: NS,
-	singleServer?: boolean,
-	server?: IServer,
-	write: boolean = false,
-): Promise<void> {
+export function generateServerReport(ns: NS, singleServer?: boolean, server?: IServer, write: boolean = false): void {
 	const servers: IServer[] = listIServers(ns);
 	if (singleServer && server) {
 		const output = serverReportSlug(server);

@@ -3,7 +3,7 @@ import { IServer } from './server_v2';
 import { generateServerSlug } from './util_v2';
 
 export async function main(ns: NS): Promise<void> {
-	let queue: IServer[] = [];
+	const queue: IServer[] = [];
 	let mult: number = 3;
 
 	const maxRam: number = Math.pow(2, 20);
@@ -17,13 +17,9 @@ export async function main(ns: NS): Promise<void> {
 		queue.push(new IServer(ns, server) as IServer);
 	});
 
-	while (true) {
+	while (Math.pow(2, mult) >= maxRam) {
 		if (!ns.scriptRunning('loop.js', 'home')) {
 			ns.scriptKill(ns.getScriptName(), 'home');
-		}
-		if (Math.pow(2, mult) >= maxRam) {
-			ns.tprint('Maxed on Servers, killing script.');
-			return;
 		}
 		const count: number = queue.length;
 		const cashOnHand: number = ns.getPlayer().money;
