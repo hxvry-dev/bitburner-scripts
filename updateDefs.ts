@@ -25,7 +25,7 @@ async function downloadFile(url: string, savePath: string): Promise<void> {
 
 const fileUrl =
 	'https://raw.githubusercontent.com/bitburner-official/bitburner-src/dev/src/ScriptEditor/NetscriptDefinitions.d.ts';
-const filePath = path.resolve(__dirname, '../NetscriptDefinitions.d.ts');
+const filePath = path.resolve(__dirname, './NetscriptDefinitions.d.ts');
 
 downloadFile(fileUrl, filePath)
 	.then(() => console.log('Updated Netscript Definitions'))

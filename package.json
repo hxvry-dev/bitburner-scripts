@@ -2,8 +2,9 @@
 	"name": "viteburner-template",
 	"version": "0.0.1",
 	"scripts": {
-		"dev": "viteburner",
-		"defs": "tsc ./updateDefs/updateDefs && node ./updateDefs/updateDefs && rm ./updateDefs/updateDefs.js"
+		"preinstall": "tsc ./updateDefs && node ./updateDefs && rm ./updateDefs.js",
+		"prettier": "prettier . --write",
+		"dev": "viteburner"
 	},
 	"author": "Schmeng",
 	"devDependencies": {

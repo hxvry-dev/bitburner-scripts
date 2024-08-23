@@ -148,4 +148,5 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
+/src/stats/*
 NetscriptDefinitions.d.ts
