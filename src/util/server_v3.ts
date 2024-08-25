@@ -1,4 +1,4 @@
-import { Server, NS } from '@ns';
+import { NS, Server } from '@ns';
 
 interface ServerPortInformation {
 	/** Whether or not the SSH Port is open */
@@ -65,22 +65,22 @@ interface MoneyInformation {
 	readonly serverGrowth?: number;
 }
 
-interface InfoDump {
-	ports: ServerPortInformation;
-	serverInfo: ServerInformation;
-	securityInfo: SecurityInformation;
-	RAMInfo: RAMInformation;
-	moneyInfo: MoneyInformation;
-}
-
 export class IServer {
-	constructor(public ns: NS, public host: string) {
+	private host: string;
+	private ns: NS;
+	private data: Server;
+	constructor(ns: NS, host: string) {
 		this.ns = ns;
 		this.host = host;
+		this.data = this.ns.getServer(this.host);
 	}
-	get data(): Server {
-		return this.ns.getServer(this.host);
-	}
+	hackPrograms = ['BruteSSH.exe', 'FTPCrack.exe', 'relaySMTP.exe', 'HTTPWorm.exe', 'SQLInject.exe'];
+
+	scriptNames = {
+		hack: 'scripts/hack_v2.js',
+		weaken: 'scripts/weaken_v2.js',
+		grow: 'scripts/grow_v2.js',
+	};
 	get hostname(): string {
 		return this.data.hostname;
 	}
@@ -129,15 +129,6 @@ export class IServer {
 			serverGrowth: this.data.serverGrowth,
 		};
 	}
-	get info(): InfoDump {
-		return {
-			ports: this.serverPortInfo,
-			serverInfo: this.generalInfo,
-			securityInfo: this.securityInfo,
-			RAMInfo: this.RAMInfo,
-			moneyInfo: this.moneyInfo,
-		};
-	}
 	/**
 	 * Gets the amount of possible threads for a specific hacking script
 	 * @param scriptRAM Required amount of free RAM needed to execute a script
@@ -158,23 +149,57 @@ export class IServer {
 		});
 	}
 	/**
+	 * Copies the specified hacking scripts to the target server
+	 * @param ns Netscript API
+	 * @param hostname Hostname of the server you want to copy files to
+	 */
+	copy(): void {
+		const scripts = ['scripts/grow_v2.js', 'scripts/hack_v2.js', 'scripts/weaken_v2.js'];
+
+		const growExists: boolean = this.ns.fileExists('scripts/grow_v2.js', this.host);
+		const hackExists: boolean = this.ns.fileExists('scripts/hack_v2.js', this.host);
+		const weakenExists: boolean = this.ns.fileExists('scripts/weaken_v2.js', this.host);
+		if (!growExists) {
+			this.ns.scp(scripts[0], this.host, 'home');
+		}
+		if (!hackExists) {
+			this.ns.scp(scripts[1], this.host, 'home');
+		}
+		if (!weakenExists) {
+			this.ns.scp(scripts[2], this.host, 'home');
+		}
+	}
+	/**
+	 *
+	 * @param ns Netscript API
+	 * @param scriptName The name of the script being run against the `target` server
+	 * @param hostname The hostname of the server running the script
+	 * @param threads The number of threads being used to run the script
+	 * @param target The target? server that the script is attacking/growing/weakening
+	 */
+	exec(hostname: string, scriptName: string, threadCount: number): void {
+		try {
+			this.ns.exec(scriptName, hostname, { threads: threadCount }, 'n00dles');
+		} catch {}
+	}
+	/**
 	 * Attempts to gain access to a server by using any/all hacking methods available to the player
 	 */
 	root(): void {
 		try {
 			this.ns.nuke(this.data.hostname);
-		} catch (e) {
-			this.ns.print(e);
-		}
+		} catch {}
 		try {
 			this.ns.brutessh(this.data.hostname);
+			this.ns.nuke(this.data.hostname);
 			this.ns.ftpcrack(this.data.hostname);
+			this.ns.nuke(this.data.hostname);
 			this.ns.relaysmtp(this.data.hostname);
+			this.ns.nuke(this.data.hostname);
 			this.ns.httpworm(this.data.hostname);
+			this.ns.nuke(this.data.hostname);
 			this.ns.sqlinject(this.data.hostname);
 			this.ns.nuke(this.data.hostname);
-		} catch (e) {
-			this.ns.print(e);
-		}
+		} catch {}
 	}
 }

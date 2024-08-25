@@ -1,9 +1,8 @@
 import { NS } from '@ns';
-import { listServers } from './util_v2';
+import { ServerScanner } from './serverScanner';
 
-/** @param {NS} ns Netscript API */
-export function main(ns: NS): void {
-	const deleteServers: boolean = ns.args[0] as boolean;
+export async function main(ns: NS, deleteServers: boolean) {
+	const serverScanner: ServerScanner = new ServerScanner(ns);
 	if (deleteServers) {
 		const pServers: string[] = ns.getPurchasedServers();
 		for (let i = 0; i < pServers.length; i++) {
@@ -12,7 +11,7 @@ export function main(ns: NS): void {
 		}
 		return;
 	}
-	const servers: string[] = listServers(ns);
+	const servers: string[] = serverScanner.scanAllServers();
 	let killedServers: number = 0;
 	servers.forEach((target) => {
 		if (!ns.scriptRunning('auto.js', 'home')) {
@@ -30,6 +29,6 @@ export function main(ns: NS): void {
 		ns.tprint('Nothing to kill! Aborting');
 		return;
 	} else {
-		ns.tprint(`Scripts killed on ${killedServers}`);
+		ns.print(`Num Scripts Killed: ${killedServers}`);
 	}
 }

@@ -20,7 +20,7 @@ export async function main(ns: NS): Promise<void> {
 					server.root();
 					if (server.generalInfo.hasAdminRights) {
 						rootedHosts.push(server.generalInfo.hostname);
-						await generateServerReport(ns, true, server, true);
+						generateServerReport(ns, true, server, true);
 					}
 				} catch (e) {
 					ns.print(e);
@@ -31,17 +31,17 @@ export async function main(ns: NS): Promise<void> {
 					if (server.securityInfo.hackDifficulty! > server.securityInfo.minDifficulty!) {
 						const threads: number = server.threadCount(1.75);
 						if (threads >= 1) {
-							await exec(ns, server.generalInfo.hostname, scriptNames.weaken, threads);
+							exec(ns, server.generalInfo.hostname, scriptNames.weaken, threads);
 						}
 					} else if (server.moneyInfo.moneyAvailable! <= server.moneyInfo.moneyMax!) {
 						const threads: number = server.threadCount(1.75);
 						if (threads >= 1) {
-							await exec(ns, server.generalInfo.hostname, scriptNames.grow, threads);
+							exec(ns, server.generalInfo.hostname, scriptNames.grow, threads);
 						}
 					} else {
 						const threads: number = server.threadCount(1.7);
 						if (threads >= 1) {
-							await exec(ns, server.generalInfo.hostname, scriptNames.hack, threads);
+							exec(ns, server.generalInfo.hostname, scriptNames.hack, threads);
 						}
 					}
 				}

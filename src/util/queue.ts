@@ -1,5 +1,4 @@
-import { NS } from '@ns';
-import { IServer } from './server';
+import { IServer } from './server_v3';
 
 export class Queue extends Array {
 	add(val: string | IServer) {
@@ -17,7 +16,7 @@ export class Queue extends Array {
 	isEmpty() {
 		return this.length === 0;
 	}
-	write(ns: NS) {
+	write() {
 		let result: string = '';
 		for (let i = 0; i < this.length; i++) {
 			if (this[i] === '') {
@@ -26,6 +25,6 @@ export class Queue extends Array {
 				result += `${this[i]}, `;
 			}
 		}
-		return ns.write('/res/out.txt', result, 'w');
+		return result;
 	}
 }
