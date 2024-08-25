@@ -1,49 +1,78 @@
 import { NS } from '@ns';
-import { IServer } from './server_v2';
-import { generateServerSlug } from './util_v2';
+import { Queue } from './queue';
 
+/**
+ * Generates a random Server name
+ * @param length Total length of the generated Slug
+ * @returns The generated Slug
+ */
+function generateServerSlug(length?: number): string {
+	const chars: string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
+	let result: string = '';
+	if (!length || length < 5) {
+		length = 5;
+	}
+	for (let i = 0; i < length; i++) {
+		result += chars.charAt(Math.floor(Math.random() * chars.length));
+	}
+	return result;
+}
+/**
+ *
+ * https://www.reddit.com/r/Bitburner/comments/ribd84/purchase_server_autoscaling_script_107gb/
+ * @param ns Netscript API
+ * @returns Newly purchased server(s)
+ */
 export async function main(ns: NS): Promise<void> {
-	const queue: IServer[] = [];
-	let mult: number = 3;
+	ns.disableLog('ALL');
+	let multiplier: number = 3;
 
-	const maxRam: number = Math.pow(2, 20);
-	const servers: string[] = ns.getPurchasedServers();
+	const servers = ns.getPurchasedServers();
 
 	if (servers.length > 0) {
 		const potentialMaxRam: number = servers.reduce((a, e) => Math.max(a, ns.getServerMaxRam(e)), 3);
-		while (Math.pow(2, mult) < potentialMaxRam) mult++;
+		while (Math.pow(2, multiplier) < potentialMaxRam) multiplier++;
 	}
+
+	const queue = new Queue();
 	servers.forEach((server) => {
-		queue.push(new IServer(ns, server) as IServer);
+		queue.add(server);
 	});
 
-	while (Math.pow(2, mult) >= maxRam) {
-		if (!ns.scriptRunning('loop.js', 'home')) {
+	const maxRam: number = Math.pow(2, 20);
+
+	while (true) {
+		if (!ns.scriptRunning('loop_v2.js', 'home')) {
 			ns.scriptKill(ns.getScriptName(), 'home');
+		}
+		if (Math.pow(2, multiplier) >= maxRam) {
+			ns.tprint('Maxed on Servers, killing script.');
+			return;
 		}
 		const count: number = queue.length;
 		const cashOnHand: number = ns.getPlayer().money;
-		const ram: number = Math.min(Math.pow(2, 20), Math.pow(2, mult));
+		const ram: number = Math.min(Math.pow(2, 20), Math.pow(2, multiplier));
 		const cost: number = ns.getPurchasedServerCost(ram);
 
 		if (count >= ns.getPurchasedServerLimit() && cashOnHand >= cost) {
-			let current: IServer = queue[0];
-			if (Math.min(maxRam, Math.pow(2, mult)) <= ns.getServerMaxRam(current.generalInfo.hostname)) {
-				ns.tprint(`Bumping RAM mult from ${mult} to ${mult + 1}`);
-				mult = mult + 1;
+			let current: string = queue.peek();
+			if (Math.min(maxRam, Math.pow(2, multiplier)) <= ns.getServerMaxRam(current)) {
+				ns.tprint(`Bumping RAM multiplier from ${multiplier} to ${multiplier + 1}`);
+				multiplier = multiplier + 1;
 				continue;
 			} else {
-				current = queue.shift()!;
-				ns.killall(current.generalInfo.hostname);
-				ns.deleteServer(current.generalInfo.hostname);
+				current = queue.remove();
+				ns.killall(current);
+				ns.deleteServer(current);
 			}
 		} else if (count < ns.getPurchasedServerLimit() && cashOnHand >= cost) {
 			const slug: string = generateServerSlug();
 			const serverName: string = `pserv-${slug}`;
 			const newServer = ns.purchaseServer(serverName, ram);
-			const newIServer: IServer = new IServer(ns, newServer);
-			queue.push(newIServer);
+			queue.add(newServer);
 		}
+		// Write the queue to a file.
+		ns.write('res/out.txt', queue.write(), 'w');
 		await ns.sleep(1000);
 	}
 }

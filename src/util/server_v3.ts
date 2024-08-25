@@ -66,15 +66,21 @@ interface MoneyInformation {
 }
 
 export class IServer {
-	private readonly ns: NS;
-	public host: string;
+	private host: string;
+	private ns: NS;
+	private data: Server;
 	constructor(ns: NS, host: string) {
 		this.ns = ns;
 		this.host = host;
+		this.data = this.ns.getServer(this.host);
 	}
-	private get data(): Server {
-		return this.ns.getServer(this.host);
-	}
+	hackPrograms = ['BruteSSH.exe', 'FTPCrack.exe', 'relaySMTP.exe', 'HTTPWorm.exe', 'SQLInject.exe'];
+
+	scriptNames = {
+		hack: 'scripts/hack_v2.js',
+		weaken: 'scripts/weaken_v2.js',
+		grow: 'scripts/grow_v2.js',
+	};
 	get hostname(): string {
 		return this.data.hostname;
 	}
@@ -145,24 +151,22 @@ export class IServer {
 	/**
 	 * Copies the specified hacking scripts to the target server
 	 * @param ns Netscript API
-	 * @param serversToVisit Array of server hostnames to copy files to
+	 * @param hostname Hostname of the server you want to copy files to
 	 */
-	copy(serversToVisit: IServer[]): void {
+	copy(): void {
 		const scripts = ['scripts/grow_v2.js', 'scripts/hack_v2.js', 'scripts/weaken_v2.js'];
 
-		for (const server of serversToVisit) {
-			const growExists: boolean = this.ns.fileExists('scripts/grow_v2.js', server.generalInfo.hostname);
-			const hackExists: boolean = this.ns.fileExists('scripts/hack_v2.js', server.generalInfo.hostname);
-			const weakenExists: boolean = this.ns.fileExists('scripts/weaken_v2.js', server.generalInfo.hostname);
-			if (!growExists) {
-				this.ns.scp(scripts[0], server.generalInfo.hostname, 'home');
-			}
-			if (!hackExists) {
-				this.ns.scp(scripts[1], server.generalInfo.hostname, 'home');
-			}
-			if (!weakenExists) {
-				this.ns.scp(scripts[2], server.generalInfo.hostname, 'home');
-			}
+		const growExists: boolean = this.ns.fileExists('scripts/grow_v2.js', this.host);
+		const hackExists: boolean = this.ns.fileExists('scripts/hack_v2.js', this.host);
+		const weakenExists: boolean = this.ns.fileExists('scripts/weaken_v2.js', this.host);
+		if (!growExists) {
+			this.ns.scp(scripts[0], this.host, 'home');
+		}
+		if (!hackExists) {
+			this.ns.scp(scripts[1], this.host, 'home');
+		}
+		if (!weakenExists) {
+			this.ns.scp(scripts[2], this.host, 'home');
 		}
 	}
 	/**
@@ -175,33 +179,8 @@ export class IServer {
 	 */
 	exec(hostname: string, scriptName: string, threadCount: number): void {
 		try {
-			this.ns.exec(scriptName, hostname, threadCount, 'n00dles');
-		} catch {
-			this.ns.print(`
-        Something went wrong, waiting a cycle and trying again.
-        Here's some info on what happened:
-        
-        Hostname: ${hostname}
-        Thread count attempted: ${threadCount}
-        Script trying to be run: ${scriptName}
-        `);
-		}
-	}
-	/**
-	 * Generates a random Server name
-	 * @param length Total length of the generated Slug
-	 * @returns The generated Slug
-	 */
-	generateServerSlug(length?: number): string {
-		const chars: string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
-		let result: string = '';
-		if (!length || length < 5) {
-			length = 5;
-		}
-		for (let i = 0; i < length; i++) {
-			result += chars.charAt(Math.floor(Math.random() * chars.length));
-		}
-		return result;
+			this.ns.exec(scriptName, hostname, { threads: threadCount }, 'n00dles');
+		} catch {}
 	}
 	/**
 	 * Attempts to gain access to a server by using any/all hacking methods available to the player
@@ -209,18 +188,18 @@ export class IServer {
 	root(): void {
 		try {
 			this.ns.nuke(this.data.hostname);
-		} catch (e) {
-			this.ns.print(e);
-		}
+		} catch {}
 		try {
 			this.ns.brutessh(this.data.hostname);
+			this.ns.nuke(this.data.hostname);
 			this.ns.ftpcrack(this.data.hostname);
+			this.ns.nuke(this.data.hostname);
 			this.ns.relaysmtp(this.data.hostname);
+			this.ns.nuke(this.data.hostname);
 			this.ns.httpworm(this.data.hostname);
+			this.ns.nuke(this.data.hostname);
 			this.ns.sqlinject(this.data.hostname);
 			this.ns.nuke(this.data.hostname);
-		} catch (e) {
-			this.ns.print(e);
-		}
+		} catch {}
 	}
 }
