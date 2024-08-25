@@ -42,7 +42,7 @@ export async function main(ns: NS): Promise<void> {
 	const maxRam: number = Math.pow(2, 20);
 
 	while (true) {
-		if (!ns.scriptRunning('loop_v2.js', 'home')) {
+		if (!ns.scriptRunning('loop.js', 'home')) {
 			ns.scriptKill(ns.getScriptName(), 'home');
 		}
 		if (Math.pow(2, multiplier) >= maxRam) {
