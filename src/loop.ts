@@ -45,24 +45,24 @@ export async function main(ns: NS): Promise<void> {
 				server.generalInfo.hostname !== 'home' &&
 				server.securityInfo.requiredHackingSkill! <= ns.getHackingLevel()
 			) {
-				const threads: number = server.threadCount(1.7);
-				if (threads >= 1 && server.moneyInfo.moneyAvailable! >= server.moneyInfo.moneyMax! * 0.75) {
-					servers.forEach((idx) => {
-						idx.exec(server.generalInfo.hostname, server.scriptNames.hack, threads);
-					});
-				} else if (server.securityInfo.hackDifficulty! > server.securityInfo.minDifficulty!) {
+				if (server.securityInfo.hackDifficulty! > server.securityInfo.minDifficulty!) {
 					const threads: number = server.threadCount(1.75);
 					if (threads >= 1) {
-						servers.forEach((idx) => {
+						for (const idx of servers) {
 							idx.exec(server.generalInfo.hostname, server.scriptNames.weaken, threads);
-						});
+						}
 					}
 				} else if (server.moneyInfo.moneyAvailable! <= server.moneyInfo.moneyMax!) {
 					const threads: number = server.threadCount(1.75);
 					if (threads >= 1) {
-						servers.forEach((idx) => {
+						for (const idx of servers) {
 							idx.exec(server.generalInfo.hostname, server.scriptNames.grow, threads);
-						});
+						}
+					}
+				} else {
+					const threads: number = server.threadCount(1.7);
+					for (const idx of servers) {
+						idx.exec(server.generalInfo.hostname, server.scriptNames.hack, threads);
 					}
 				}
 			}
