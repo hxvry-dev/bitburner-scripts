@@ -1,4 +1,5 @@
 import { NS, Server } from '@ns';
+import { ServerManager } from './serverManager';
 
 interface ServerPortInformation {
 	/** Whether or not the SSH Port is open */
@@ -65,13 +66,11 @@ interface MoneyInformation {
 	readonly serverGrowth?: number;
 }
 
-export class IServer {
+export class IServer extends ServerManager {
 	private host: string;
-	public ns: NS;
 	private data: Server;
-	private readonly visited: Set<string> = new Set<string>();
 	constructor(ns: NS, host?: string) {
-		this.ns = ns;
+		super(ns);
 		this.host = host ? host : this.ns.getHostname();
 		this.data = this.ns.getServer(this.host);
 	}
@@ -139,17 +138,6 @@ export class IServer {
 		return Math.floor(this.RAMInfo.freeRam / scriptRAM);
 	}
 	/**
-	 * Deletes all Player-Purchased Servers
-	 */
-	scrub(): void {
-		const servers: string[] = this.ns.getPurchasedServers();
-
-		servers.forEach((server) => {
-			this.ns.killall(server);
-			this.ns.deleteServer(server);
-		});
-	}
-	/**
 	 * Copies the specified hacking scripts to the target server
 	 * @param ns Netscript API
 	 * @param hostname Hostname of the server you want to copy files to
@@ -157,17 +145,10 @@ export class IServer {
 	copy(): void {
 		const scripts = ['scripts/grow_v2.js', 'scripts/hack_v2.js', 'scripts/weaken_v2.js'];
 
-		const growExists: boolean = this.ns.fileExists('scripts/grow_v2.js', this.host);
-		const hackExists: boolean = this.ns.fileExists('scripts/hack_v2.js', this.host);
-		const weakenExists: boolean = this.ns.fileExists('scripts/weaken_v2.js', this.host);
-		if (!growExists) {
-			this.ns.scp(scripts[0], this.host, 'home');
-		}
-		if (!hackExists) {
-			this.ns.scp(scripts[1], this.host, 'home');
-		}
-		if (!weakenExists) {
-			this.ns.scp(scripts[2], this.host, 'home');
+		for (const script of scripts) {
+			if (!this.ns.fileExists(script, this.host)) {
+				this.ns.scp(script, this.host, 'home');
+			}
 		}
 	}
 	/**
@@ -181,7 +162,9 @@ export class IServer {
 	exec(hostname: string, scriptName: string, threadCount: number): void {
 		try {
 			this.ns.exec(scriptName, hostname, { threads: threadCount }, 'n00dles');
-		} catch {}
+		} catch {
+			/* empty */
+		}
 	}
 	/**
 	 * Attempts to gain access to a server by using any/all hacking methods available to the player
@@ -189,30 +172,22 @@ export class IServer {
 	root(): void {
 		try {
 			this.ns.nuke(this.data.hostname);
-		} catch {}
+		} catch {
+			/* empty */
+		}
 		try {
 			this.ns.brutessh(this.data.hostname);
-			this.ns.nuke(this.data.hostname);
 			this.ns.ftpcrack(this.data.hostname);
-			this.ns.nuke(this.data.hostname);
 			this.ns.relaysmtp(this.data.hostname);
-			this.ns.nuke(this.data.hostname);
 			this.ns.httpworm(this.data.hostname);
-			this.ns.nuke(this.data.hostname);
 			this.ns.sqlinject(this.data.hostname);
 			this.ns.nuke(this.data.hostname);
-		} catch {}
-	}
-	killAll(deleteServers: boolean): void {
-		if (deleteServers) {
-			const pServers: string[] = this.ns.getPurchasedServers();
-			for (let i = 0; i < pServers.length; i++) {
-				this.ns.killall(pServers[i]);
-				this.ns.deleteServer(pServers[i]);
-			}
-			return;
+		} catch {
+			/* empty */
 		}
-		const servers: string[] = this.scanAllServers();
+	}
+	killAll(): void {
+		const servers: string[] = this.recursiveScan();
 		let killedServers: number = 0;
 		servers.forEach((target) => {
 			if (!this.ns.scriptRunning('auto.js', 'home')) {
@@ -233,27 +208,8 @@ export class IServer {
 			this.ns.print(`Num Scripts Killed: ${killedServers}`);
 		}
 	}
-	scanAllServers(): string[] {
-		const queue: string[] = ['home'];
-		const servers: string[] = [];
-		while (queue.length > 0) {
-			const current: string | undefined = queue.shift();
-			if (this.visited.has(current!)) {
-				continue;
-			}
-			this.visited.add(current!);
-			servers.push(current!);
-			const neighbors: string[] = this.ns.scan(current!);
-			for (const neighbor of neighbors) {
-				if (!this.visited.has(neighbor)) {
-					queue.push(neighbor);
-				}
-			}
-		}
-		return servers;
-	}
 	get IServerList(): IServer[] {
-		const servers: string[] = this.scanAllServers();
+		const servers: string[] = this.recursiveScan();
 		const IServerList: IServer[] = [];
 		servers.forEach((server) => {
 			const newServer: IServer = new IServer(this.ns, server);
