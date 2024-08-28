@@ -1,10 +1,11 @@
 import { NS } from '@ns';
 import { IServer } from './util/server_v3';
-import { Queue, ServerManager } from './util/serverManager';
+import { ServerManager } from './util/serverManager';
+import { Queue } from './util/queue';
 
 export async function main(ns: NS): Promise<void> {
-	//ns.disableLog('ALL');
-	ns.disableLog('sleep');
+	ns.disableLog('ALL');
+	//ns.disableLog('sleep');
 	ns.enableLog('exec');
 
 	const serverManager: ServerManager = new ServerManager(ns);
@@ -12,7 +13,8 @@ export async function main(ns: NS): Promise<void> {
 	const purchasedServerQueue: Queue = new Queue();
 	const maxRAM: number = Math.pow(2, 20);
 	const rootedHosts: Set<string> = new Set<string>();
-	let multiplier = 3;
+	let multiplier: number = 3;
+	let isKilled: boolean = false;
 
 	if (purchasedServers.length > 0) {
 		const potentialMaxRAM: number = purchasedServers.reduce<number>(
@@ -34,7 +36,16 @@ export async function main(ns: NS): Promise<void> {
 
 		const servers: IServer[] = new IServer(ns).IServerList;
 		for (const server of servers) {
+			try {
+				if (!isKilled) {
+					server.killAll();
+					isKilled = true;
+				}
+			} catch {
+				/* empty */
+			}
 			server.copy();
+			server.generateServerReport;
 			if (!server.generalInfo.hasAdminRights) {
 				server.root();
 				if (server.generalInfo.hasAdminRights) {

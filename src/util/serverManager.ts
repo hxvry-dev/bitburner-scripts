@@ -1,8 +1,8 @@
 import { NS } from '@ns';
-import { IServer } from './server_v3';
 
 export class ServerManager {
-	private ns: NS;
+	ns: NS;
+	private readonly visited: Set<string> = new Set<string>();
 	constructor(ns: NS) {
 		this.ns = ns;
 	}
@@ -54,33 +54,23 @@ export class ServerManager {
 			this.ns.tprint(`Server ${hostname} does not exist.`);
 		}
 	}
-}
-
-export class Queue extends Array {
-	add(val: string | IServer) {
-		this.push(val);
-	}
-	remove() {
-		return this.shift();
-	}
-	peek() {
-		return this[0];
-	}
-	backPeek() {
-		return this[this.length - 1];
-	}
-	isEmpty() {
-		return this.length === 0;
-	}
-	write() {
-		let result: string = '';
-		for (let i = 0; i < this.length; i++) {
-			if (this[i] === '') {
+	recursiveScan(): string[] {
+		const queue: string[] = ['home'];
+		const servers: string[] = [];
+		while (queue.length > 0) {
+			const current: string | undefined = queue.shift();
+			if (this.visited.has(current!)) {
 				continue;
-			} else {
-				result += `${this[i]}, `;
+			}
+			this.visited.add(current!);
+			servers.push(current!);
+			const neighbors: string[] = this.ns.scan(current!);
+			for (const neighbor of neighbors) {
+				if (!this.visited.has(neighbor)) {
+					queue.push(neighbor);
+				}
 			}
 		}
-		return result;
+		return servers;
 	}
 }
