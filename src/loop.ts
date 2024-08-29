@@ -5,7 +5,6 @@ import { Queue } from './util/queue';
 
 export async function main(ns: NS): Promise<void> {
 	ns.disableLog('ALL');
-	//ns.disableLog('sleep');
 	ns.enableLog('exec');
 
 	const serverManager: ServerManager = new ServerManager(ns);
@@ -97,7 +96,6 @@ export async function main(ns: NS): Promise<void> {
 			const newServer = ns.purchaseServer(serverName, ram);
 			purchasedServerQueue.add(newServer);
 		}
-		// Write the queue to a file.
 		ns.write('res/out.txt', purchasedServerQueue.write(), 'w');
 		await ns.sleep(1000);
 		/** End Player-Purchased Server Logic */
