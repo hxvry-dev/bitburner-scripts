@@ -1,7 +1,5 @@
-import { IServer } from './server_v3';
-
 export class Queue extends Array {
-	add(val: string | IServer) {
+	add(val: unknown) {
 		this.push(val);
 	}
 	remove() {
