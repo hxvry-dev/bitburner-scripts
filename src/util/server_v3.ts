@@ -1,5 +1,5 @@
-import { NS, Server } from '@ns';
-import { ServerManager } from './serverManager';
+import { NS } from '@ns';
+import { BaseServer } from './baseServer';
 
 interface ServerPortInformation {
 	/** Whether or not the SSH Port is open */
@@ -66,12 +66,11 @@ interface MoneyInformation {
 	readonly serverGrowth?: number;
 }
 
-export class IServer extends ServerManager {
-	private host: string;
-	private data: Server;
+export class IServer extends BaseServer {
+	public host: string | undefined;
 	constructor(ns: NS, host?: string) {
-		super(ns);
-		this.host = host ? host : this.ns.getHostname();
+		super(ns, host);
+		this.host = host;
 		this.data = this.ns.getServer(this.host);
 	}
 	hackPrograms = ['BruteSSH.exe', 'FTPCrack.exe', 'relaySMTP.exe', 'HTTPWorm.exe', 'SQLInject.exe'];
@@ -81,9 +80,6 @@ export class IServer extends ServerManager {
 		weaken: 'scripts/weaken_v2.js',
 		grow: 'scripts/grow_v2.js',
 	};
-	get hostname(): string {
-		return this.data.hostname;
-	}
 	get generalInfo(): ServerInformation {
 		return {
 			hostname: this.data.hostname,
@@ -137,6 +133,15 @@ export class IServer extends ServerManager {
 	threadCount(scriptRAM: number): number {
 		return Math.floor(this.RAMInfo.freeRam / scriptRAM);
 	}
+	get serverList() {
+		const servers: string[] = this.recursiveScan();
+		const serverList: IServer[] = [];
+		servers.forEach((server) => {
+			const newServer: IServer = new IServer(this.ns, server);
+			serverList.push(newServer);
+		});
+		return serverList;
+	}
 	/**
 	 * Copies the specified hacking scripts to the target server
 	 * @param ns Netscript API
@@ -146,8 +151,8 @@ export class IServer extends ServerManager {
 		const scripts = ['scripts/grow_v2.js', 'scripts/hack_v2.js', 'scripts/weaken_v2.js'];
 
 		for (const script of scripts) {
-			if (!this.ns.fileExists(script, this.host)) {
-				this.ns.scp(script, this.host, 'home');
+			if (!this.ns.fileExists(script, this.hostname)) {
+				this.ns.scp(script, this.hostname, 'home');
 			}
 		}
 	}
@@ -307,5 +312,14 @@ export class IServer extends ServerManager {
 				}
 			});
 		}
+	}
+	generateServerName() {
+		const chars: string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
+		const length: number = 5;
+		let result: string = '';
+		for (let i = 0; i < length; i++) {
+			result += chars.charAt(Math.floor(Math.random() * chars.length));
+		}
+		return result;
 	}
 }

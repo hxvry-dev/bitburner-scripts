@@ -1,13 +1,11 @@
 import { NS } from '@ns';
 import { IServer } from './util/server_v3';
-import { ServerManager } from './util/serverManager';
 import { Queue } from './util/queue';
 
 export async function main(ns: NS): Promise<void> {
 	ns.disableLog('ALL');
 	ns.enableLog('exec');
 
-	const serverManager: ServerManager = new ServerManager(ns);
 	const purchasedServers: string[] = ns.getPurchasedServers();
 	const purchasedServerQueue: Queue = new Queue();
 	const maxRAM: number = Math.pow(2, 20);
@@ -91,7 +89,7 @@ export async function main(ns: NS): Promise<void> {
 				ns.deleteServer(current);
 			}
 		} else if (count < ns.getPurchasedServerLimit() && cashOnHand >= cost) {
-			const slug: string = serverManager.generateServerName();
+			const slug: string = new IServer(ns).generateServerName();
 			const serverName: string = `pserv-${slug}`;
 			const newServer = ns.purchaseServer(serverName, ram);
 			purchasedServerQueue.add(newServer);
