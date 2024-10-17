@@ -1,37 +1,79 @@
 import { NS, Server } from '@ns';
 
-type IsHackable = Pick<Server, 'openPortCount' | 'numOpenPortsRequired'>;
-type Packet = {
-	port: number;
-	payload: string;
-};
-
-type Args = {
-	payloadPort: number;
+type BaseServerArgs = {
+	host: string;
 	serverList: string;
-	dispatchJob: boolean;
-	isHackable: boolean;
-	openPorts: number;
+	isReady: boolean;
+};
+type WorkerScripts = {
+	hack: string;
+	grow: string;
+	weaken: string;
+	all: Array<string>;
 };
 
 export class BaseServer {
 	protected ns: NS;
 	public data: Server;
 	public hostname: string;
-	public args: Args;
+	public args: BaseServerArgs;
 	constructor(ns: NS, hostname?: string) {
 		this.ns = ns;
 		this.hostname = hostname ? hostname : this.ns.getHostname();
+
+		const killLogs: string[] = ['scan', 'getHackingLevel', 'killall'];
+		killLogs.forEach((log) => {
+			this.ns.disableLog(log);
+		});
+
 		this.args = {
-			payloadPort: 0,
+			host: '',
 			serverList: '',
-			dispatchJob: false,
-			isHackable: false,
-			openPorts: 0,
+			isReady: false,
 		};
-		this.data = this.ns.getServer();
+
+		this.data = this.ns.getServer(this.hostname);
 	}
-	recursiveScan() {
+	hackPrograms = ['BruteSSH.exe', 'FTPCrack.exe', 'relaySMTP.exe', 'HTTPWorm.exe', 'SQLInject.exe'];
+	workers: WorkerScripts = {
+		hack: 'payloads/batchHack.js',
+		grow: 'payloads/batchGrow.js',
+		weaken: 'payloads/batchWeaken.js',
+		all: ['payloads/batchHack.js', 'payloads/batchGrow.js', 'payloads/batchWeaken.js'],
+	};
+	legacyWorkers: WorkerScripts = {
+		hack: 'scripts/hack_v2.js',
+		grow: 'scripts/grow_v2.ts',
+		weaken: 'scripts/weaken_v2.js',
+		all: ['scripts/hack_v2.ts', 'scripts/weaken_v2.ts', 'scripts/grow_v2.ts'],
+	};
+	/**
+	 * Initialize/set some defaults that we'll be using later.
+	 */
+	async init(): Promise<void> {
+		this.args.serverList = this.recursiveScan().toString();
+		this.args.host = this.hostname;
+		this.killAll();
+		if (this.isPrepped && this.isHackable) {
+			this.args.isReady = true;
+		}
+	}
+	/**
+	 * Copies the specified hacking scripts to the target server
+	 * @param legacy Whether or not the server in question is using the legacy IServer method
+	 */
+	copy(legacy?: boolean): void {
+		const scripts: WorkerScripts = legacy ? this.legacyWorkers : this.workers;
+		for (const script of scripts.all) {
+			if (!this.ns.fileExists(script, this.hostname)) {
+				this.ns.scp(script, this.hostname, 'home');
+			}
+		}
+	}
+	/**
+	 * @returns An array of all server hostnames.
+	 */
+	recursiveScan(): Array<string> {
 		const visited: Set<string> = new Set<string>();
 		const queue: string[] = ['home'];
 		const servers: string[] = [];
@@ -49,36 +91,38 @@ export class BaseServer {
 				}
 			}
 		}
-		this.args.serverList = servers.toString();
 		return servers;
 	}
-	sendPacket(payload: string) {
-		if (this.args.dispatchJob) {
-			const packet: Packet = {
-				port: this.args.payloadPort as number,
-				payload: payload,
-			};
-			return packet;
-		}
-	}
-	isHackable(): boolean {
-		const isHackable: IsHackable = this.data;
-		if (isHackable.numOpenPortsRequired === isHackable.openPortCount) {
-			this.args.isHackable = true;
-			this.args.dispatchJob = true;
-			this.args.payloadPort = 22;
+	/**
+	 * @returns True if this server's security is at the lowest possible value, and that the money available is equal to the maximum money available on the server. False otherwise.
+	 */
+	get isPrepped(): boolean {
+		if (this.data.minDifficulty == this.data.hackDifficulty && this.data.moneyAvailable == this.data.moneyMax) {
 			return true;
 		} else {
-			this.root();
-			this.args.isHackable = false;
-			this.args.dispatchJob = false;
 			return false;
 		}
 	}
+	/**
+	 * @returns True if the server has money, administrator privileges, and if the hacking level required to hack the server is less than the players' hacking level. False otherwise.
+	 */
+	get isHackable(): boolean {
+		if (
+			this.data.moneyMax! > 0 &&
+			this.data.hasAdminRights &&
+			this.data.requiredHackingSkill! < this.ns.getHackingLevel()
+		) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	/**
+	 * Attempts to gain root/adminstrator permissions on the target server.
+	 */
 	root(): void {
-		this.args.openPorts = 0;
-		if (this.args.isHackable) {
-			this.args.openPorts = -1;
+		let openPorts: number = 0;
+		if (this.isHackable) {
 			return;
 		}
 		try {
@@ -86,25 +130,25 @@ export class BaseServer {
 		} catch {
 			if (this.ns.fileExists('brutessh.exe', 'home')) {
 				this.ns.brutessh(this.data.hostname);
-				this.args.openPorts += 1;
+				openPorts += 1;
 			}
 			if (this.ns.fileExists('ftpcrack.exe', 'home')) {
 				this.ns.ftpcrack(this.data.hostname);
-				this.args.openPorts += 1;
+				openPorts += 1;
 			}
 			if (this.ns.fileExists('relaysmtp.exe', 'home')) {
 				this.ns.relaysmtp(this.data.hostname);
-				this.args.openPorts += 1;
+				openPorts += 1;
 			}
 			if (this.ns.fileExists('httpworm.exe', 'home')) {
 				this.ns.httpworm(this.data.hostname);
-				this.args.openPorts += 1;
+				openPorts += 1;
 			}
 			if (this.ns.fileExists('sqlinject.exe', 'home')) {
 				this.ns.sqlinject(this.data.hostname);
-				this.args.openPorts += 1;
+				openPorts += 1;
 			}
-			if (this.data.numOpenPortsRequired! <= this.args.openPorts) {
+			if (this.data.numOpenPortsRequired! <= openPorts) {
 				this.ns.nuke(this.data.hostname);
 				this.ns.scp(
 					[
@@ -118,17 +162,32 @@ export class BaseServer {
 			}
 		}
 	}
+	/**
+	 * Attempts to force kill any/all scripts running on the target server.
+	 */
+	killAll(): void {
+		const servers: string[] = this.recursiveScan();
+		let killedScripts: number = 0;
+		servers.forEach((target) => {
+			if (target !== 'home') {
+				const serverKilled: boolean = this.ns.killall(target);
+				if (serverKilled) {
+					killedScripts++;
+				}
+			}
+		});
+
+		if (killedScripts == 0) {
+			this.ns.tprint('Nothing to kill! Aborting');
+			return;
+		} else {
+			this.ns.tprint(`Num of Killed Scripts ${killedScripts}`);
+		}
+	}
 }
 
 export async function main(ns: NS) {
-	const killLogs: string[] = ['scan'];
-	killLogs.forEach((log) => {
-		ns.disableLog(log);
-	});
-
-	const baseServer: BaseServer = new BaseServer(ns);
-	baseServer.recursiveScan();
-	baseServer.isHackable();
-	baseServer.root();
+	const baseServer: BaseServer = new BaseServer(ns, 'n00dles');
+	await baseServer.init();
 	ns.print(baseServer.args);
 }
