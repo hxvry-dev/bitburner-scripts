@@ -18,13 +18,12 @@ export class BaseServer {
 		});
 
 		this.args = {
-			host: '',
 			serverList: '',
 			isReady: false,
 		};
 
 		this.data = this.ns.getServer(this.hostname);
-		this.logger = new Logger(ns);
+		this.logger = new Logger(this.ns);
 	}
 	hackPrograms = ['BruteSSH.exe', 'FTPCrack.exe', 'relaySMTP.exe', 'HTTPWorm.exe', 'SQLInject.exe'];
 	workers: WorkerScripts = {
@@ -44,13 +43,11 @@ export class BaseServer {
 	 */
 	async init(): Promise<void> {
 		this.args.serverList = this.recursiveScan().toString();
-		this.args.host = this.hostname;
 		this.killAll();
 		if (this.isPrepped && this.isHackable) {
 			this.args.isReady = true;
+			this.logger.info('The server has successfully initialized!');
 		}
-		this.logger.deferLog('The server has successfully initialized!', 'info');
-		this.logger.processQueue();
 	}
 	/**
 	 * Copies the specified hacking scripts to the target server
@@ -63,7 +60,7 @@ export class BaseServer {
 				this.ns.scp(script, this.hostname, 'home');
 			}
 		}
-		this.logger.deferLog(`Copied file(s) successfully! Filenames are as follows: ${scripts.all}`, 'info');
+		this.logger.info(`Copied file(s) successfully! Filenames are as follows: ${scripts.all}`);
 	}
 	/**
 	 * @returns An array of all server hostnames.
@@ -145,7 +142,7 @@ export class BaseServer {
 			}
 			if (this.data.numOpenPortsRequired! <= openPorts) {
 				this.ns.nuke(this.data.hostname);
-				this.logger.deferLog(`Nuked! ${this.data.hostname}`, 'info');
+				this.logger.info(`Nuked! ${this.data.hostname}`);
 				this.ns.scp(
 					[
 						'batcher/payloads/batchGrow.js',
@@ -174,10 +171,10 @@ export class BaseServer {
 		});
 
 		if (killedScripts == 0) {
-			this.logger.deferLog(`Zero Scripts to Kill, Aborting.`, 'info');
+			this.logger.info(`Zero Scripts to Kill, Aborting.`);
 			return;
 		} else {
-			this.logger.deferLog(`# Killed Scripts This Run: ${killedScripts}`, 'info');
+			this.logger.info(`# Killed Scripts This Run: ${killedScripts}`);
 		}
 	}
 }

@@ -1,5 +1,4 @@
 export type BaseServerArgs = {
-	host: string;
 	serverList: string;
 	isReady: boolean;
 };

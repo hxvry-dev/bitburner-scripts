@@ -2,13 +2,11 @@ import { NS } from '@ns';
 import { TimeObject } from './types';
 
 export class Logger {
-	private ns: NS;
-	private fileName: string;
-	private queue: string[];
+	protected fileName: string;
+	protected ns: NS;
 	constructor(ns: NS) {
 		this.ns = ns;
 		this.fileName = `util/logs/log.txt`;
-		this.queue = [];
 	}
 	ts(): TimeObject {
 		const now: Date = new Date();
@@ -22,16 +20,16 @@ export class Logger {
 		const logFormat: string = `[${year}${month}${day}-${hours}:${minutes}:${seconds}.${ms}]`;
 		return { now, logFormat, year, month, day, hours, minutes, seconds } as TimeObject;
 	}
-	deferLog(message: string, level: string): void {
-		this.queue.push(`[${level.toUpperCase()}] -${this.ts().logFormat}- [${message}]\n`);
-		return;
+	info(message: string): void {
+		return this.ns.write(this.fileName, `[INFO] -${this.ts().logFormat}- [${message}]\n`, 'a');
 	}
-	processQueue(): void {
-		while (this.queue.length > 0) {
-			const currentMessage: string | undefined = this.queue.shift();
-			if (currentMessage) {
-				return this.ns.write(this.fileName, currentMessage + ' [d]\n', 'a');
-			}
-		}
+	warn(message: string): void {
+		return this.ns.write(this.fileName, `[WARN] -${this.ts().logFormat}- [${message}]\n`, 'a');
+	}
+	error(message: string): void {
+		return this.ns.write(this.fileName, `[ERROR] -${this.ts().logFormat}- [${message}]\n`, 'a');
+	}
+	critical(message: string): void {
+		return this.ns.write(this.fileName, `[CRITICAL] -${this.ts().logFormat}- [${message}]\n`, 'a');
 	}
 }
