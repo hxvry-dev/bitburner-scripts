@@ -1,22 +1,13 @@
+import { BaseServerArgs, WorkerScripts } from '@/util/types';
 import { NS, Server } from '@ns';
-
-type BaseServerArgs = {
-	host: string;
-	serverList: string;
-	isReady: boolean;
-};
-type WorkerScripts = {
-	hack: string;
-	grow: string;
-	weaken: string;
-	all: Array<string>;
-};
+import { Logger } from './logger';
 
 export class BaseServer {
 	protected ns: NS;
 	public data: Server;
 	public hostname: string;
 	public args: BaseServerArgs;
+	private logger: Logger;
 	constructor(ns: NS, hostname?: string) {
 		this.ns = ns;
 		this.hostname = hostname ? hostname : this.ns.getHostname();
@@ -33,6 +24,7 @@ export class BaseServer {
 		};
 
 		this.data = this.ns.getServer(this.hostname);
+		this.logger = new Logger(ns);
 	}
 	hackPrograms = ['BruteSSH.exe', 'FTPCrack.exe', 'relaySMTP.exe', 'HTTPWorm.exe', 'SQLInject.exe'];
 	workers: WorkerScripts = {
@@ -57,6 +49,8 @@ export class BaseServer {
 		if (this.isPrepped && this.isHackable) {
 			this.args.isReady = true;
 		}
+		this.logger.deferLog('The server has successfully initialized!', 'info');
+		this.logger.processQueue();
 	}
 	/**
 	 * Copies the specified hacking scripts to the target server
@@ -69,6 +63,7 @@ export class BaseServer {
 				this.ns.scp(script, this.hostname, 'home');
 			}
 		}
+		this.logger.deferLog(`Copied file(s) successfully! Filenames are as follows: ${scripts.all}`, 'info');
 	}
 	/**
 	 * @returns An array of all server hostnames.
@@ -150,6 +145,7 @@ export class BaseServer {
 			}
 			if (this.data.numOpenPortsRequired! <= openPorts) {
 				this.ns.nuke(this.data.hostname);
+				this.logger.deferLog(`Nuked! ${this.data.hostname}`, 'info');
 				this.ns.scp(
 					[
 						'batcher/payloads/batchGrow.js',
@@ -178,10 +174,10 @@ export class BaseServer {
 		});
 
 		if (killedScripts == 0) {
-			this.ns.tprint('Nothing to kill! Aborting');
+			this.logger.deferLog(`Zero Scripts to Kill, Aborting.`, 'info');
 			return;
 		} else {
-			this.ns.tprint(`Num of Killed Scripts ${killedScripts}`);
+			this.logger.deferLog(`# Killed Scripts This Run: ${killedScripts}`, 'info');
 		}
 	}
 }
