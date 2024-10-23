@@ -34,6 +34,7 @@ export class Batcher extends BaseServer {
 			return false;
 		}
 	}
+	// https://github.com/emirdero/bitburner_scripts/blob/main/prep.js
 	prepTarget(target: string, hosts: string[]) {
 		const costPerThread: number = this.ns.getScriptRam('batcher/payloads/batchWeaken.js', 'home');
 		let { growThreads, weakenThreads }: PrepThreadObject = this.prepThreads(target);
