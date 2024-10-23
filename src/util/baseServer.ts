@@ -1,13 +1,21 @@
-import { BaseServerArgs, WorkerScripts } from '@/util/types';
 import { NS, Server } from '@ns';
-import { Logger } from './logger';
+
+export type BaseServerArgs = {
+	serverList: string;
+	isReady: boolean;
+};
+export type WorkerScripts = {
+	hack: string;
+	grow: string;
+	weaken: string;
+	all: Array<string>;
+};
 
 export class BaseServer {
 	protected ns: NS;
 	public data: Server;
 	public hostname: string;
 	public args: BaseServerArgs;
-	protected logger: Logger;
 	constructor(ns: NS, hostname?: string) {
 		this.ns = ns;
 		this.hostname = hostname ? hostname : this.ns.getHostname();
@@ -23,7 +31,6 @@ export class BaseServer {
 		};
 
 		this.data = this.ns.getServer(this.hostname);
-		this.logger = new Logger(this.ns);
 	}
 	hackPrograms = ['BruteSSH.exe', 'FTPCrack.exe', 'relaySMTP.exe', 'HTTPWorm.exe', 'SQLInject.exe'];
 	workers: WorkerScripts = {
@@ -55,7 +62,6 @@ export class BaseServer {
 				this.ns.scp(script, this.hostname, 'home');
 			}
 		}
-		this.logger.info(`Copied file(s) successfully! Filenames are as follows: ${scripts.all}`);
 	}
 	/**
 	 * @returns An array of all server hostnames.
@@ -113,7 +119,6 @@ export class BaseServer {
 			}
 			if (this.data.numOpenPortsRequired! <= openPorts) {
 				this.ns.nuke(this.data.hostname);
-				this.logger.info(`Nuked! ${this.data.hostname}`);
 				this.ns.scp(
 					[
 						'batcher/payloads/batchGrow.js',
@@ -142,16 +147,16 @@ export class BaseServer {
 		});
 
 		if (killedScripts == 0) {
-			this.logger.info(`Zero Scripts to Kill, Aborting.`);
+			this.ns.tprint(`Nothing to kill, aborting...`);
 			return;
 		} else {
-			this.logger.info(`# Killed Scripts This Run: ${killedScripts}`);
+			this.ns.tprint(`# Killed Scripts This Run: ${killedScripts}`);
 		}
 	}
 }
 
 export async function main(ns: NS) {
 	const baseServer: BaseServer = new BaseServer(ns, 'n00dles');
-	await baseServer.init();
+	baseServer.init();
 	ns.print(baseServer.args);
 }
