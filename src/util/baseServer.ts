@@ -7,7 +7,7 @@ export class BaseServer {
 	public data: Server;
 	public hostname: string;
 	public args: BaseServerArgs;
-	private logger: Logger;
+	protected logger: Logger;
 	constructor(ns: NS, hostname?: string) {
 		this.ns = ns;
 		this.hostname = hostname ? hostname : this.ns.getHostname();
@@ -27,10 +27,10 @@ export class BaseServer {
 	}
 	hackPrograms = ['BruteSSH.exe', 'FTPCrack.exe', 'relaySMTP.exe', 'HTTPWorm.exe', 'SQLInject.exe'];
 	workers: WorkerScripts = {
-		hack: 'payloads/batchHack.js',
-		grow: 'payloads/batchGrow.js',
-		weaken: 'payloads/batchWeaken.js',
-		all: ['payloads/batchHack.js', 'payloads/batchGrow.js', 'payloads/batchWeaken.js'],
+		hack: 'batcher/payloads/batchHack.js',
+		grow: 'batcher/payloads/batchGrow.js',
+		weaken: 'batcher/payloads/batchWeaken.js',
+		all: ['batcher/payloads/batchHack.js', 'batcher/payloads/batchGrow.js', 'batcher/payloads/batchWeaken.js'],
 	};
 	legacyWorkers: WorkerScripts = {
 		hack: 'scripts/hack_v2.js',
@@ -41,13 +41,8 @@ export class BaseServer {
 	/**
 	 * Initialize/set some defaults that we'll be using later.
 	 */
-	async init(): Promise<void> {
+	init(): void {
 		this.args.serverList = this.recursiveScan().toString();
-		this.killAll();
-		if (this.isPrepped && this.isHackable) {
-			this.args.isReady = true;
-			this.logger.info('The server has successfully initialized!');
-		}
 	}
 	/**
 	 * Copies the specified hacking scripts to the target server
@@ -86,35 +81,11 @@ export class BaseServer {
 		return servers;
 	}
 	/**
-	 * @returns True if this server's security is at the lowest possible value, and that the money available is equal to the maximum money available on the server. False otherwise.
-	 */
-	get isPrepped(): boolean {
-		if (this.data.minDifficulty == this.data.hackDifficulty && this.data.moneyAvailable == this.data.moneyMax) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-	/**
-	 * @returns True if the server has money, administrator privileges, and if the hacking level required to hack the server is less than the players' hacking level. False otherwise.
-	 */
-	get isHackable(): boolean {
-		if (
-			this.data.moneyMax! > 0 &&
-			this.data.hasAdminRights &&
-			this.data.requiredHackingSkill! < this.ns.getHackingLevel()
-		) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-	/**
 	 * Attempts to gain root/adminstrator permissions on the target server.
 	 */
 	root(): void {
 		let openPorts: number = 0;
-		if (this.isHackable) {
+		if (this.data.hasAdminRights) {
 			return;
 		}
 		try {

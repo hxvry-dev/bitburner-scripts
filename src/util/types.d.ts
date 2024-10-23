@@ -1,3 +1,7 @@
+export type PrepThreadObject = {
+	growThreads: number;
+	weakenThreads: number;
+};
 export type BaseServerArgs = {
 	serverList: string;
 	isReady: boolean;
