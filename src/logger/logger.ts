@@ -1,32 +1,16 @@
 import { NS } from '@ns';
 
-type LogLevel = 'INFO' | 'WARN' | 'ERROR' | 'CRITICAL';
-type LogMessage = {
-	payload: string;
-	ts: string;
-	msgId: string;
-};
+type LogLevel = 'INFO' | 'WARN' | 'ERROR' | 'DEBUG';
 export class Logger {
 	private ns: NS;
-	private isDebug: boolean;
-	private isTrace: boolean;
-	private logName: string;
-	private pprint: boolean;
-	logPort: number;
-	constructor(ns: NS, logName: string = '', isTrace: boolean = false, isDebug: boolean = true) {
+	private logName?: string;
+	private logPort: number;
+	constructor(ns: NS, logName: string = '') {
 		this.ns = ns;
 		this.logPort = 20;
-		this.logName = '';
-		this.isDebug = true;
-		this.isTrace = false;
-		this.pprint = true;
+		this.logName = logName ? logName : '';
 	}
-	set setLogName(logName: string) {
-		if (typeof logName !== 'string') return;
-		this.logName = logName;
-		return;
-	}
-	colors = {
+	private colors = {
 		BLACK: '\u001b[30m',
 		WHITE: '\u001B[37m',
 		RED: '\u001B[31m',
@@ -42,14 +26,83 @@ export class Logger {
 		RED_BG: '\x1b[41m',
 		RESET: '\u001B[0m',
 	};
-}
+	/**
+	 *
+	 * @param level The log level to add color to
+	 *
+	 * Level corresponds to the {@link colors} object.
+	 * @returns A formatted string containing the log level with the designated color applied, depending on the level
+	 *
+	 * Example: {red_background}[ERROR]{color_reset}
+	 */
+	private colorByLevel(level: string): string {
+		let color: string = '';
+		switch (level) {
+			case 'info': {
+				color = this.colors.BLUE;
+				break;
+			}
+			case 'warn': {
+				color = this.colors.YELLOW;
+				break;
+			}
+			case 'error': {
+				color = this.colors.RED;
+				break;
+			}
+			case 'debug': {
+				color = this.colors.GREY;
+				break;
+			}
+			default: {
+				color = this.colors.DEFAULT_GREEN;
+				break;
+			}
+		}
+		return color;
+	}
+	/**
+	 *
+	 * @returns Generated timestamp and UNIX timestamp for logging purposes.
+	 */
+	private ts() {
+		const today: Date = new Date();
+		const epoch: number = Date.now();
+		return {
+			logTsFormat: `${today.getFullYear()}-${today.getMonth()}-${today.getDay()} ${today.getHours()}:${today.getMinutes()}:${today.getSeconds()}.${today.getMilliseconds()}`,
+			epoch: epoch,
+		};
+	}
+	private msg(level: LogLevel, _msg: string) {
+		const { logTsFormat, epoch } = this.ts();
 
-export async function main(ns: NS) {
-	ns.tail();
-	ns.resizeTail(250, 150);
-	ns.moveTail(0, 0);
-	const logger: Logger = new Logger(ns);
-	while (ns.readPort(logger.logPort) !== 'NULL PORT DATA') {
-		break;
+		const epochTsFormatStr: string = `${this.colors.MAGENTA}${epoch}${this.colors.RESET}`;
+		const logTsFormatStr: string = `${this.colors.GREY}${logTsFormat}${this.colors.RESET}`;
+		const logLevelFormatStr: string = `${this.colorByLevel(level.toLowerCase())}[${level}]${this.colors.RESET}`;
+		const logNameFormatStr: string = this.logName?.length
+			? ` ${this.colors.YELLOW}(${this.logName})${this.colors.RESET}`
+			: `${epochTsFormatStr}`;
+		const logMsgFormatStr: string = `${this.colors.WHITE}${_msg}${this.colors.RESET}`;
+
+		return `> ${logTsFormatStr}| ${logLevelFormatStr}${logNameFormatStr}> ${logMsgFormatStr}`;
+	}
+	private format(msg: object): string {
+		return `${this.colors.SLATE_BLUE}${JSON.stringify(msg, null, 4)}${this.colors.RESET}`;
+	}
+	private log(level: LogLevel, msg: string): void {
+		this.ns.print(this.msg(level, msg));
+	}
+	info(msg: string) {
+		this.log('INFO', msg);
+	}
+	warn(msg: string) {
+		this.log('WARN', msg);
+	}
+	error(msg: string) {
+		this.log('ERROR', msg);
+	}
+	debug(msg: object) {
+		const sMsg: string = this.format(msg);
+		this.log('DEBUG', sMsg);
 	}
 }

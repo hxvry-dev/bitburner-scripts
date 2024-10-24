@@ -1,7 +1,8 @@
+import { Logger } from '@/logger/logger';
 import { NS, Server } from '@ns';
 
 export type BaseServerArgs = {
-	serverList: string;
+	serverList: string[];
 	isReady: boolean;
 };
 
@@ -10,8 +11,10 @@ export class BaseServer {
 	public data: Server;
 	public hostname: string;
 	public args: BaseServerArgs;
+	protected logger: Logger;
 	constructor(ns: NS, hostname?: string) {
 		this.ns = ns;
+		this.logger = new Logger(this.ns, 'baseServer');
 		this.hostname = hostname ? hostname : this.ns.getHostname();
 
 		const killLogs: string[] = ['scan', 'getHackingLevel', 'killall'];
@@ -20,7 +23,7 @@ export class BaseServer {
 		});
 
 		this.args = {
-			serverList: '',
+			serverList: [],
 			isReady: false,
 		};
 
@@ -37,7 +40,8 @@ export class BaseServer {
 	 * Initialize/set some defaults that we'll be using later.
 	 */
 	init(): void {
-		this.args.serverList = this.recursiveScan().toString();
+		this.args.serverList = this.recursiveScan();
+		this.logger.info('Server Initialized Successfully!');
 	}
 	/**
 	 * Copies the specified hacking scripts to the target server
@@ -50,6 +54,7 @@ export class BaseServer {
 				this.ns.scp(script, this.hostname, 'home');
 			}
 		}
+		this.logger.info('Copy operation completed successfully!');
 	}
 	/**
 	 * @returns An array of all server hostnames.
@@ -72,6 +77,8 @@ export class BaseServer {
 				}
 			}
 		}
+		this.logger.info('Generated server list!');
+		this.logger.debug(servers);
 		return servers;
 	}
 	/**
@@ -135,10 +142,10 @@ export class BaseServer {
 		});
 
 		if (killedScripts == 0) {
-			this.ns.tprint(`Nothing to kill, aborting...`);
+			this.logger.warn(`Nothing to kill. Aborting...`);
 			return;
 		} else {
-			this.ns.tprint(`# Killed Scripts This Run: ${killedScripts}`);
+			this.logger.info(`# Killed Scripts This Run: ${killedScripts}`);
 		}
 	}
 }
@@ -146,5 +153,5 @@ export class BaseServer {
 export async function main(ns: NS) {
 	const baseServer: BaseServer = new BaseServer(ns, 'n00dles');
 	baseServer.init();
-	ns.print(baseServer.args);
+	baseServer.killAll();
 }

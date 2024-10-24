@@ -143,20 +143,6 @@ export class IServer extends BaseServer {
 		return serverList;
 	}
 	/**
-	 * Copies the specified hacking scripts to the target server
-	 * @param ns Netscript API
-	 * @param hostname Hostname of the server you want to copy files to
-	 */
-	copy(): void {
-		const scripts = ['scripts/grow_v2.js', 'scripts/hack_v2.js', 'scripts/weaken_v2.js'];
-
-		for (const script of scripts) {
-			if (!this.ns.fileExists(script, this.hostname)) {
-				this.ns.scp(script, this.hostname, 'home');
-			}
-		}
-	}
-	/**
 	 *
 	 * @param ns Netscript API
 	 * @param scriptName The name of the script being run against the `target` server
@@ -169,48 +155,6 @@ export class IServer extends BaseServer {
 			this.ns.exec(scriptName, hostname, { threads: threadCount }, 'n00dles');
 		} catch {
 			/* empty */
-		}
-	}
-	/**
-	 * Attempts to gain access to a server by using any/all hacking methods available to the player
-	 */
-	root(): void {
-		try {
-			this.ns.nuke(this.data.hostname);
-		} catch {
-			/* empty */
-		}
-		try {
-			this.ns.brutessh(this.data.hostname);
-			this.ns.ftpcrack(this.data.hostname);
-			this.ns.relaysmtp(this.data.hostname);
-			this.ns.httpworm(this.data.hostname);
-			this.ns.sqlinject(this.data.hostname);
-			this.ns.nuke(this.data.hostname);
-		} catch {
-			/* empty */
-		}
-	}
-	killAll(): void {
-		const servers: string[] = this.recursiveScan();
-		let killedServers: number = 0;
-		servers.forEach((target) => {
-			if (!this.ns.scriptRunning('auto.js', 'home')) {
-				this.ns.scriptKill('util/killall.js', 'home');
-			}
-			if (target !== 'home') {
-				const serverKilled: boolean = this.ns.killall(target);
-				if (serverKilled) {
-					killedServers++;
-				}
-			}
-		});
-
-		if (killedServers == 0) {
-			this.ns.tprint('Nothing to kill! Aborting');
-			return;
-		} else {
-			this.ns.print(`Num Scripts Killed: ${killedServers}`);
 		}
 	}
 	get IServerList(): IServer[] {

@@ -41,7 +41,7 @@ export async function main(ns: NS): Promise<void> {
 			} catch {
 				/* empty */
 			}
-			server.copy();
+			server.copy(true);
 			server.generateServerReport;
 			if (!server.generalInfo.hasAdminRights) {
 				server.root();
