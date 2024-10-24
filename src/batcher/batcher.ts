@@ -1,9 +1,12 @@
+import { Logger } from '@/logger/logger';
 import { BaseServer } from '@/util/baseServer';
 import { NS } from '@ns';
 
 export class Batcher extends BaseServer {
+	protected logger: Logger;
 	constructor(ns: NS) {
 		super(ns);
+		this.logger = new Logger(ns, 'batcher');
 		if (this.isPrepped && this.isHackable) {
 			this.args.isReady = true;
 		}

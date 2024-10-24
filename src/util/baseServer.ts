@@ -14,7 +14,7 @@ export class BaseServer {
 	protected logger: Logger;
 	constructor(ns: NS, hostname?: string) {
 		this.ns = ns;
-		this.logger = new Logger(this.ns, 'baseServer');
+		this.logger = new Logger(this.ns, 'bserver');
 		this.hostname = hostname ? hostname : this.ns.getHostname();
 
 		const killLogs: string[] = ['scan', 'getHackingLevel', 'killall'];

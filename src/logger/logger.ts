@@ -3,12 +3,12 @@ import { NS } from '@ns';
 type LogLevel = 'INFO' | 'WARN' | 'ERROR' | 'DEBUG';
 export class Logger {
 	private ns: NS;
-	private logName?: string;
 	private logPort: number;
+	name?: string;
 	constructor(ns: NS, logName: string = '') {
 		this.ns = ns;
 		this.logPort = 20;
-		this.logName = logName ? logName : '';
+		this.name = logName ? logName : '';
 	}
 	private colors = {
 		BLACK: '\u001b[30m',
@@ -79,8 +79,8 @@ export class Logger {
 		const epochTsFormatStr: string = `${this.colors.MAGENTA}${epoch}${this.colors.RESET}`;
 		const logTsFormatStr: string = `${this.colors.GREY}${logTsFormat}${this.colors.RESET}`;
 		const logLevelFormatStr: string = `${this.colorByLevel(level.toLowerCase())}[${level}]${this.colors.RESET}`;
-		const logNameFormatStr: string = this.logName?.length
-			? ` ${this.colors.YELLOW}(${this.logName})${this.colors.RESET}`
+		const logNameFormatStr: string = this.name?.length
+			? ` ${this.colors.YELLOW}(${this.name})${this.colors.RESET}`
 			: `${epochTsFormatStr}`;
 		const logMsgFormatStr: string = `${this.colors.WHITE}${_msg}${this.colors.RESET}`;
 

@@ -1,5 +1,6 @@
 import { NS } from '@ns';
 import { BaseServer } from './baseServer';
+import { Logger } from '@/logger/logger';
 
 interface ServerPortInformation {
 	/** Whether or not the SSH Port is open */
@@ -68,8 +69,10 @@ interface MoneyInformation {
 
 export class IServer extends BaseServer {
 	public host: string | undefined;
+	protected logger: Logger;
 	constructor(ns: NS, host?: string) {
 		super(ns, host);
+		this.logger = new Logger(ns, 'iserver');
 		this.host = host;
 		this.data = this.ns.getServer(this.host);
 	}
@@ -241,7 +244,7 @@ export class IServer extends BaseServer {
 				}
 				return ns.write(`stats/${server.generalInfo.hostname}-ServerStats.txt`, output, 'w');
 			} else {
-				return ns.print(output);
+				return this.logger.info(output);
 			}
 		} else {
 			servers.forEach((server) => {
@@ -252,7 +255,7 @@ export class IServer extends BaseServer {
 					}
 					return ns.write(`stats/${server.generalInfo.hostname}-ServerStats.txt`, output, 'w');
 				} else {
-					return ns.print(output);
+					return this.logger.info(output);
 				}
 			});
 		}
