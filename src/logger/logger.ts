@@ -109,7 +109,4 @@ export class Logger {
 	debug(msg: string, ...args: Array<object | string>) {
 		this.log('DEBUG', msg, args);
 	}
-	heartbeat(msg: string = this.ts().logTsFormat) {
-		this.ns.print(msg);
-	}
 }

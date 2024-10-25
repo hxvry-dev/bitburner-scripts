@@ -160,15 +160,6 @@ export class IServer extends BaseServer {
 			/* empty */
 		}
 	}
-	get IServerList(): IServer[] {
-		const servers: string[] = this.recursiveScan();
-		const IServerList: IServer[] = [];
-		servers.forEach((server) => {
-			const newServer: IServer = new IServer(this.ns, server);
-			IServerList.push(newServer);
-		});
-		return IServerList;
-	}
 	/**
 	 *
 	 * @param str The string to pad
@@ -235,7 +226,7 @@ export class IServer extends BaseServer {
 | ${this.pad(' Server Growth: ' + server.moneyInfo.serverGrowth + ' ', 52, '-')} |`;
 
 	generateServerReport(ns: NS, singleServer?: boolean, server?: IServer, write: boolean = false): void {
-		const servers: IServer[] = this.IServerList;
+		const servers: IServer[] = this.serverList;
 		if (singleServer && server) {
 			const output = this.serverReportSlug(server);
 			if (write) {

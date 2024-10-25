@@ -11,7 +11,6 @@ export async function main(ns: NS): Promise<void> {
 	while (true) {
 		if (!batcher.isPrepped(target)) {
 			batcher.prep(target);
-			logger.heartbeat();
 			await ns.sleep(ns.getWeakenTime(target) + 1000);
 		} else {
 			await batcher.execute(target, reservedRam);

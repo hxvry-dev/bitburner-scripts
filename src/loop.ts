@@ -30,7 +30,7 @@ export async function main(ns: NS): Promise<void> {
 		const ram: number = Math.min(maxRAM, Math.pow(2, multiplier));
 		const cost: number = ns.getPurchasedServerCost(ram);
 
-		const servers: IServer[] = new IServer(ns).IServerList;
+		const servers: IServer[] = new IServer(ns).serverList;
 		for (const server of servers) {
 			try {
 				if (!isKilled) {

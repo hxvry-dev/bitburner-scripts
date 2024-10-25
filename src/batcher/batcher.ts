@@ -125,5 +125,4 @@ export class Batcher extends BaseServer {
 		}
 		return false;
 	}
-	report() {}
 }
