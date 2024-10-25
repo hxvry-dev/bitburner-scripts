@@ -5,6 +5,12 @@ export type BaseServerArgs = {
 	serverList: string[];
 	isReady: boolean;
 };
+type BatchWorkerScript = {
+	hack: string;
+	grow: string;
+	weaken: string;
+	all: string[];
+};
 
 export class BaseServer {
 	protected ns: NS;
@@ -30,12 +36,18 @@ export class BaseServer {
 		this.data = this.ns.getServer(this.hostname);
 	}
 	hackPrograms = ['BruteSSH.exe', 'FTPCrack.exe', 'relaySMTP.exe', 'HTTPWorm.exe', 'SQLInject.exe'];
-	workers: string[] = [
-		'batcher/payloads/batchHack.js',
-		'batcher/payloads/batchGrow.js',
-		'batcher/payloads/batchWeaken.js',
-	];
-	legacyWorkers: string[] = ['scripts/hack_v2.ts', 'scripts/weaken_v2.ts', 'scripts/grow_v2.ts'];
+	workers: BatchWorkerScript = {
+		hack: 'batcher/payloads/batchHack.js',
+		grow: 'batcher/payloads/batchGrow.js',
+		weaken: 'batcher/payloads/batchWeaken.js',
+		all: ['batcher/payloads/batchHack.js', 'batcher/payloads/batchGrow.js', 'batcher/payloads/batchWeaken.js'],
+	};
+	legacyWorkers: BatchWorkerScript = {
+		hack: 'scripts/hack_v2.js',
+		grow: 'scripts/grow_v2.js',
+		weaken: 'scripts/weaken_v2.js',
+		all: ['scripts/hack_v2.js', 'scripts/weaken_v2.js', 'scripts/grow_v2.js'],
+	};
 	/**
 	 * Initialize/set some defaults that we'll be using later.
 	 */
@@ -48,13 +60,12 @@ export class BaseServer {
 	 * @param legacy Whether or not the server in question is using the legacy IServer method
 	 */
 	copy(legacy?: boolean): void {
-		const scripts: string[] = legacy ? this.legacyWorkers : this.workers;
-		for (const script of scripts) {
+		const scripts: BatchWorkerScript = legacy ? this.legacyWorkers : this.workers;
+		for (const script of scripts.all) {
 			if (!this.ns.fileExists(script, this.hostname)) {
 				this.ns.scp(script, this.hostname, 'home');
 			}
 		}
-		this.logger.info('Copy operation completed successfully!');
 	}
 	/**
 	 * @returns An array of all server hostnames.

@@ -10,13 +10,10 @@ import { NS, ScriptArg } from '@ns';
  */
 export async function main(
 	ns: NS,
-	threads: ScriptArg = ns.args[0],
-	time: ScriptArg = ns.args[1],
-	target: ScriptArg = ns.args[2],
+	threads = ns.args[0] as number,
+	time = ns.args[1] as number,
+	target = ns.args[2] as string,
 ): Promise<void> {
-	if (typeof threads !== 'number' || typeof time !== 'number' || typeof target !== 'string') {
-		return;
-	}
 	await ns.sleep(time);
 	await ns.grow(target, { threads });
 }

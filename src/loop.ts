@@ -4,7 +4,6 @@ import { Queue } from './util/queue';
 
 export async function main(ns: NS): Promise<void> {
 	ns.disableLog('ALL');
-	ns.enableLog('exec');
 
 	const purchasedServers: string[] = ns.getPurchasedServers();
 	const purchasedServerQueue: Queue = new Queue();
