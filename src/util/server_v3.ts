@@ -1,5 +1,6 @@
-import { NS, Server } from '@ns';
-import { ServerManager } from './serverManager';
+import { NS } from '@ns';
+import { BaseServer } from './baseServer';
+import { Logger } from '@/logger/logger';
 
 interface ServerPortInformation {
 	/** Whether or not the SSH Port is open */
@@ -66,12 +67,13 @@ interface MoneyInformation {
 	readonly serverGrowth?: number;
 }
 
-export class IServer extends ServerManager {
-	private host: string;
-	private data: Server;
+export class IServer extends BaseServer {
+	public host: string | undefined;
+	protected logger: Logger;
 	constructor(ns: NS, host?: string) {
-		super(ns);
-		this.host = host ? host : this.ns.getHostname();
+		super(ns, host);
+		this.logger = new Logger(ns, 'iserver');
+		this.host = host;
 		this.data = this.ns.getServer(this.host);
 	}
 	hackPrograms = ['BruteSSH.exe', 'FTPCrack.exe', 'relaySMTP.exe', 'HTTPWorm.exe', 'SQLInject.exe'];
@@ -81,9 +83,6 @@ export class IServer extends ServerManager {
 		weaken: 'scripts/weaken_v2.js',
 		grow: 'scripts/grow_v2.js',
 	};
-	get hostname(): string {
-		return this.data.hostname;
-	}
 	get generalInfo(): ServerInformation {
 		return {
 			hostname: this.data.hostname,
@@ -137,19 +136,14 @@ export class IServer extends ServerManager {
 	threadCount(scriptRAM: number): number {
 		return Math.floor(this.RAMInfo.freeRam / scriptRAM);
 	}
-	/**
-	 * Copies the specified hacking scripts to the target server
-	 * @param ns Netscript API
-	 * @param hostname Hostname of the server you want to copy files to
-	 */
-	copy(): void {
-		const scripts = ['scripts/grow_v2.js', 'scripts/hack_v2.js', 'scripts/weaken_v2.js'];
-
-		for (const script of scripts) {
-			if (!this.ns.fileExists(script, this.host)) {
-				this.ns.scp(script, this.host, 'home');
-			}
-		}
+	get serverList() {
+		const servers: string[] = this.recursiveScan();
+		const serverList: IServer[] = [];
+		servers.forEach((server) => {
+			const newServer: IServer = new IServer(this.ns, server);
+			serverList.push(newServer);
+		});
+		return serverList;
 	}
 	/**
 	 *
@@ -165,57 +159,6 @@ export class IServer extends ServerManager {
 		} catch {
 			/* empty */
 		}
-	}
-	/**
-	 * Attempts to gain access to a server by using any/all hacking methods available to the player
-	 */
-	root(): void {
-		try {
-			this.ns.nuke(this.data.hostname);
-		} catch {
-			/* empty */
-		}
-		try {
-			this.ns.brutessh(this.data.hostname);
-			this.ns.ftpcrack(this.data.hostname);
-			this.ns.relaysmtp(this.data.hostname);
-			this.ns.httpworm(this.data.hostname);
-			this.ns.sqlinject(this.data.hostname);
-			this.ns.nuke(this.data.hostname);
-		} catch {
-			/* empty */
-		}
-	}
-	killAll(): void {
-		const servers: string[] = this.recursiveScan();
-		let killedServers: number = 0;
-		servers.forEach((target) => {
-			if (!this.ns.scriptRunning('auto.js', 'home')) {
-				this.ns.scriptKill('util/killall.js', 'home');
-			}
-			if (target !== 'home') {
-				const serverKilled: boolean = this.ns.killall(target);
-				if (serverKilled) {
-					killedServers++;
-				}
-			}
-		});
-
-		if (killedServers == 0) {
-			this.ns.tprint('Nothing to kill! Aborting');
-			return;
-		} else {
-			this.ns.print(`Num Scripts Killed: ${killedServers}`);
-		}
-	}
-	get IServerList(): IServer[] {
-		const servers: string[] = this.recursiveScan();
-		const IServerList: IServer[] = [];
-		servers.forEach((server) => {
-			const newServer: IServer = new IServer(this.ns, server);
-			IServerList.push(newServer);
-		});
-		return IServerList;
 	}
 	/**
 	 *
@@ -283,7 +226,7 @@ export class IServer extends ServerManager {
 | ${this.pad(' Server Growth: ' + server.moneyInfo.serverGrowth + ' ', 52, '-')} |`;
 
 	generateServerReport(ns: NS, singleServer?: boolean, server?: IServer, write: boolean = false): void {
-		const servers: IServer[] = this.IServerList;
+		const servers: IServer[] = this.serverList;
 		if (singleServer && server) {
 			const output = this.serverReportSlug(server);
 			if (write) {
@@ -292,7 +235,7 @@ export class IServer extends ServerManager {
 				}
 				return ns.write(`stats/${server.generalInfo.hostname}-ServerStats.txt`, output, 'w');
 			} else {
-				return ns.print(output);
+				return this.logger.info(output);
 			}
 		} else {
 			servers.forEach((server) => {
@@ -303,9 +246,18 @@ export class IServer extends ServerManager {
 					}
 					return ns.write(`stats/${server.generalInfo.hostname}-ServerStats.txt`, output, 'w');
 				} else {
-					return ns.print(output);
+					return this.logger.info(output);
 				}
 			});
 		}
+	}
+	generateServerName() {
+		const chars: string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
+		const length: number = 5;
+		let result: string = '';
+		for (let i = 0; i < length; i++) {
+			result += chars.charAt(Math.floor(Math.random() * chars.length));
+		}
+		return result;
 	}
 }
