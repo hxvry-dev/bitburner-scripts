@@ -15,5 +15,5 @@ export async function main(
 	target = ns.args[2] as string,
 ): Promise<void> {
 	await ns.sleep(time);
-	await ns.grow(target, { threads });
+	await ns.hack(target, { threads });
 }

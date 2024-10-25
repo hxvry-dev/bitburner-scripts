@@ -40,7 +40,7 @@ export async function main(ns: NS): Promise<void> {
 			} catch {
 				/* empty */
 			}
-			server.copy(true);
+			server.copy(server.hostname, true);
 			server.generateServerReport;
 			if (!server.generalInfo.hasAdminRights) {
 				server.root();

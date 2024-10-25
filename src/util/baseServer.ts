@@ -3,7 +3,6 @@ import { NS, Server } from '@ns';
 
 export type BaseServerArgs = {
 	serverList: string[];
-	isReady: boolean;
 };
 type BatchWorkerScript = {
 	hack: string;
@@ -30,7 +29,6 @@ export class BaseServer {
 
 		this.args = {
 			serverList: [],
-			isReady: false,
 		};
 
 		this.data = this.ns.getServer(this.hostname);
@@ -59,11 +57,11 @@ export class BaseServer {
 	 * Copies the specified hacking scripts to the target server
 	 * @param legacy Whether or not the server in question is using the legacy IServer method
 	 */
-	copy(legacy?: boolean): void {
+	copy(hostname: string, legacy?: boolean): void {
 		const scripts: BatchWorkerScript = legacy ? this.legacyWorkers : this.workers;
 		for (const script of scripts.all) {
-			if (!this.ns.fileExists(script, this.hostname)) {
-				this.ns.scp(script, this.hostname, 'home');
+			if (!this.ns.fileExists(script, hostname)) {
+				this.ns.scp(script, hostname, 'home');
 			}
 		}
 	}
@@ -88,8 +86,8 @@ export class BaseServer {
 				}
 			}
 		}
-		this.logger.info('Generated server list!');
-		this.logger.debug(servers);
+		this.logger.debug('Generated Server List => ', servers);
+		this.args.serverList = servers;
 		return servers;
 	}
 	/**
@@ -159,10 +157,4 @@ export class BaseServer {
 			this.logger.info(`# Killed Scripts This Run: ${killedScripts}`);
 		}
 	}
-}
-
-export async function main(ns: NS) {
-	const baseServer: BaseServer = new BaseServer(ns, 'n00dles');
-	baseServer.init();
-	baseServer.killAll();
 }

@@ -51,7 +51,7 @@ export class Logger {
 				break;
 			}
 			case 'debug': {
-				color = this.colors.GREY;
+				color = this.colors.CYAN;
 				break;
 			}
 			default: {
@@ -69,40 +69,47 @@ export class Logger {
 		const today: Date = new Date();
 		const epoch: number = Date.now();
 		return {
-			logTsFormat: `${today.getFullYear()}-${today.getMonth()}-${today.getDay()} ${today.getHours()}:${today.getMinutes()}:${today.getSeconds()}.${today.getMilliseconds()}`,
+			logTsFormat: `> ${today.getFullYear()}-${today.getMonth()}-${today.getDay()} ${today.getHours()}:${today.getMinutes()}:${today.getSeconds()}.${today.getMilliseconds()} - `,
 			epoch: epoch,
 		};
 	}
 	private msg(level: LogLevel, _msg: string) {
 		const { logTsFormat, epoch } = this.ts();
 
-		const epochTsFormatStr: string = `${this.colors.MAGENTA}${epoch}${this.colors.RESET}`;
-		const logTsFormatStr: string = `${this.colors.GREY}${logTsFormat}${this.colors.RESET}`;
-		const logLevelFormatStr: string = `${this.colorByLevel(level.toLowerCase())}[${level}]${this.colors.RESET}`;
+		const logTsFormatStr: string = `${this.colors.GREY}${logTsFormat}`;
+		const logLevelFormatStr: string = `${this.colorByLevel(level.toLowerCase())}[${level}]`;
 		const logNameFormatStr: string = this.name?.length
-			? ` ${this.colors.YELLOW}(${this.name})${this.colors.RESET}`
-			: `${epochTsFormatStr}`;
-		const logMsgFormatStr: string = `${this.colors.WHITE}${_msg}${this.colors.RESET}`;
+			? ` ${this.colors.YELLOW}(${this.name})`
+			: `${this.colors.MAGENTA}${epoch}`;
+		const logMsgFormatStr: string = ` ${this.colors.WHITE}${_msg}`;
+		const ptrFormatStr: string = `${this.colors.WHITE}> `;
 
-		return `> ${logTsFormatStr}| ${logLevelFormatStr}${logNameFormatStr}> ${logMsgFormatStr}`;
+		return `${logTsFormatStr}${logLevelFormatStr}${logNameFormatStr}${ptrFormatStr}${logMsgFormatStr}${this.colors.RESET}`;
 	}
-	private format(msg: object): string {
-		return `${this.colors.SLATE_BLUE}${JSON.stringify(msg, null, 4)}${this.colors.RESET}`;
-	}
-	private log(level: LogLevel, msg: string): void {
+	private log(level: LogLevel, msg: string, args: Array<object | string>): void {
+		for (let i = 0; i < args.length; i++) {
+			if (!Array.isArray(args[i])) {
+				args[i] = `${this.colors.SLATE_BLUE}${JSON.stringify(args[i], null, 4)}`;
+			} else {
+				args[i] = `${this.colors.SLATE_BLUE}${JSON.stringify(args[i], null, 2)}`;
+			}
+			msg = `${msg}\n${args[i]}`;
+		}
 		this.ns.print(this.msg(level, msg));
 	}
-	info(msg: string) {
-		this.log('INFO', msg);
+	info(msg: string, ...args: Array<object | string>) {
+		this.log('INFO', msg, args);
 	}
-	warn(msg: string) {
-		this.log('WARN', msg);
+	warn(msg: string, ...args: Array<object | string>) {
+		this.log('WARN', msg, args);
 	}
-	error(msg: string) {
-		this.log('ERROR', msg);
+	error(msg: string, ...args: Array<object | string>) {
+		this.log('ERROR', msg, args);
 	}
-	debug(msg: object) {
-		const sMsg: string = this.format(msg);
-		this.log('DEBUG', sMsg);
+	debug(msg: string, ...args: Array<object | string>) {
+		this.log('DEBUG', msg, args);
+	}
+	heartbeat(msg: string = this.ts().logTsFormat) {
+		this.ns.print(msg);
 	}
 }
