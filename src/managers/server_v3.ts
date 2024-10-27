@@ -1,5 +1,5 @@
 import { NS } from '@ns';
-import { BaseServer } from './baseServer';
+import { BaseServer } from '../managers/baseServer';
 import { Logger } from '@/logger/logger';
 
 interface ServerPortInformation {
