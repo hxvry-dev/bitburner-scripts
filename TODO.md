@@ -14,6 +14,13 @@ Things to work on for the `bitburner-scripts` repo.
 - [ ] Allow `Batcher`/`Manager` to purchase Hack Programs (Ex. BruteSSH.exe)
     - [ ] Have the `Batcher`/`Manager` script purchase `Formulas.exe` automatically.
 
+## Now
+
+- [ ] Finish baseServer_v2
+- [ ] Finish pServers
+- [ ] Finish server_v4
+- [ ] Finish serverManager
+
 ## In Progress
 
 

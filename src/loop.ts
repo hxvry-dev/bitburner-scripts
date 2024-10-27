@@ -1,6 +1,6 @@
 import { NS } from '@ns';
-import { IServer } from './util/server_v3';
-import { Queue } from './util/queue';
+import { IServer } from '@/util/server_v3';
+import { Queue } from '@/util/queue';
 
 export async function main(ns: NS): Promise<void> {
 	ns.disableLog('ALL');
@@ -56,20 +56,20 @@ export async function main(ns: NS): Promise<void> {
 					const threads: number = server.threadCount(1.75);
 					if (threads >= 1) {
 						for (const idx of servers) {
-							idx.exec(server.generalInfo.hostname, server.scriptNames.weaken, threads);
+							ns.exec(idx.scriptNames.weaken, idx.hostname, { threads: threads }, 'n00dles');
 						}
 					}
 				} else if (server.moneyInfo.moneyAvailable! <= server.moneyInfo.moneyMax!) {
 					const threads: number = server.threadCount(1.75);
 					if (threads >= 1) {
 						for (const idx of servers) {
-							idx.exec(server.generalInfo.hostname, server.scriptNames.grow, threads);
+							ns.exec(idx.scriptNames.grow, idx.hostname, { threads: threads }, 'n00dles');
 						}
 					}
 				} else {
 					const threads: number = server.threadCount(1.7);
 					for (const idx of servers) {
-						idx.exec(server.generalInfo.hostname, server.scriptNames.hack, threads);
+						ns.exec(idx.scriptNames.hack, idx.hostname, { threads: threads }, 'n00dles');
 					}
 				}
 			}
