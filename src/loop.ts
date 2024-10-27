@@ -1,5 +1,5 @@
 import { NS } from '@ns';
-import { IServer } from '@/managers/server_v3';
+import { IServer } from '@/util/server_v3';
 import { Queue } from '@/util/queue';
 
 export async function main(ns: NS): Promise<void> {

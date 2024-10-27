@@ -1,5 +1,5 @@
 import { Logger } from '@/logger/logger';
-import { BaseServer } from '@/managers/baseServer';
+import { BaseServer } from '@/util/baseServer';
 import { NS } from '@ns';
 
 type BatchThreads = {
