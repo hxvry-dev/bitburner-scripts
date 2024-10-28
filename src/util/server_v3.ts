@@ -82,6 +82,7 @@ export class IServer extends BaseServer {
 		hack: 'scripts/hack_v2.js',
 		weaken: 'scripts/weaken_v2.js',
 		grow: 'scripts/grow_v2.js',
+		all: ['scripts/hack_v2.js', 'scripts/weaken_v2.js', 'scripts/grow_v2.js'],
 	};
 	get generalInfo(): ServerInformation {
 		return {
