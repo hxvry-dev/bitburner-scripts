@@ -1,6 +1,6 @@
 import { NS } from '@ns';
-import { Batcher } from './batcher/batcher';
-import { Logger } from './logger/logger';
+import { Batcher } from './batcher';
+import { Logger } from '../logger/logger';
 
 export async function main(ns: NS): Promise<void> {
 	const logger: Logger = new Logger(ns, 'batchLoop');
