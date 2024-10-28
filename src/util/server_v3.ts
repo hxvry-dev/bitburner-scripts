@@ -71,7 +71,7 @@ export class IServer extends BaseServer {
 	public host: string | undefined;
 	protected logger: Logger;
 	constructor(ns: NS, host?: string) {
-		super(ns, host);
+		super(ns, host!);
 		this.logger = new Logger(ns, 'iserver');
 		this.host = host;
 		this.data = this.ns.getServer(this.host);
@@ -136,7 +136,7 @@ export class IServer extends BaseServer {
 	threadCount(scriptRAM: number): number {
 		return Math.floor(this.RAMInfo.freeRam / scriptRAM);
 	}
-	get serverList() {
+	get IServerList() {
 		const servers: string[] = this.recursiveScan();
 		const serverList: IServer[] = [];
 		servers.forEach((server) => {
@@ -226,7 +226,7 @@ export class IServer extends BaseServer {
 | ${this.pad(' Server Growth: ' + server.moneyInfo.serverGrowth + ' ', 52, '-')} |`;
 
 	generateServerReport(ns: NS, singleServer?: boolean, server?: IServer, write: boolean = false): void {
-		const servers: IServer[] = this.serverList;
+		const servers: IServer[] = this.IServerList;
 		if (singleServer && server) {
 			const output = this.serverReportSlug(server);
 			if (write) {

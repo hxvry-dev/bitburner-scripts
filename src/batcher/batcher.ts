@@ -1,117 +1,25 @@
 import { Logger } from '@/logger/logger';
 import { BaseServer } from '@/util/baseServer';
+import { BatchWorkerScript, BatchThreads, PrepThreads } from '@/util/types';
 import { NS } from '@ns';
 
-type BatchThreads = {
-	hackThreads: number;
-	w1Threads: number;
-	growThreads: number;
-	w2Threads: number;
-	totalThreads: number;
-};
 export class Batcher extends BaseServer {
 	protected logger: Logger;
-	constructor(ns: NS) {
-		super(ns);
-		this.logger = new Logger(ns, 'batcher');
-	}
-	// https://github.com/emirdero/bitburner_scripts/blob/main/pwn.js#L92
-	private genBatches(target: string): BatchThreads {
-		const marginForError: number = 1.01;
-		const hackPercent: number = 0.25; // How much money we want to hack per batch.
-		const moneyGenerated: number = this.ns.getServerMaxMoney(target) * hackPercent;
-		const hackThreads: number = Math.floor(this.ns.hackAnalyzeThreads(target, moneyGenerated));
-		const growThreads: number = Math.ceil(marginForError * this.ns.growthAnalyze(target, 1 / (1 - hackPercent)));
-		const secChangePerHack: number = marginForError * this.ns.hackAnalyzeSecurity(hackThreads);
-		const secChangePerGrow: number = marginForError * this.ns.growthAnalyzeSecurity(growThreads);
-		let w1Threads: number = Math.ceil(secChangePerHack / 0.05);
-		let w2Threads: number = Math.ceil(secChangePerGrow / 0.05);
-		while (this.ns.weakenAnalyze(w1Threads) < secChangePerHack) w1Threads += 5;
-		while (this.ns.weakenAnalyze(w2Threads) < secChangePerGrow) w2Threads += 5;
-		const totalThreads: number = hackThreads + w1Threads + growThreads + w2Threads;
-		return {
-			hackThreads: hackThreads,
-			w1Threads: w1Threads,
-			growThreads: growThreads,
-			w2Threads: w2Threads,
-			totalThreads: totalThreads,
+	protected workers: BatchWorkerScript;
+
+	private marginForError: number;
+	private hackPercent: number;
+	constructor(ns: NS, hostname: string) {
+		super(ns, hostname);
+		this.workers = {
+			hack: 'batcher/payloads/batchHack.js',
+			grow: 'batcher/payloads/batchGrow.js',
+			weaken: 'batcher/payloads/batchWeaken.js',
+			all: ['batcher/payloads/batchHack.js', 'batcher/payloads/batchGrow.js', 'batcher/payloads/batchWeaken.js'],
 		};
-	}
-	// https://github.com/emirdero/bitburner_scripts/blob/main/prep.js#L42
-	private prepThreads(target: string) {
-		const growAmount: number = this.ns.getServerMaxMoney(target) / this.ns.getServerMoneyAvailable(target);
-		const growThreads: number = Math.ceil(this.ns.growthAnalyze(target, growAmount));
-		const growOffset: number = this.ns.growthAnalyzeSecurity(growThreads) / 0.05;
-		const distToMinSec: number =
-			(this.ns.getServerSecurityLevel(target) - this.ns.getServerMinSecurityLevel(target)) / 0.05;
-		const weakenThreads = Math.ceil(growOffset + distToMinSec);
-		return { growThreads: growThreads, weakenThreads: weakenThreads };
-	}
-	// https://github.com/emirdero/bitburner_scripts/blob/main/prep.js#L18
-	prep(target: string) {
-		const ramPerThread: number = this.ns.getScriptRam(this.workers.grow, 'home');
-		let { growThreads, weakenThreads } = this.prepThreads(target);
-		const growRatio = growThreads / (growThreads + weakenThreads);
-		const weakenRatio = weakenThreads / (growThreads + weakenThreads);
-		for (const server of this.args.serverList) {
-			const availableRam: number = this.ns.getServerMaxRam(server) - this.ns.getServerUsedRam(server);
-			const availableThreads: number = Math.floor(availableRam / ramPerThread);
-			if (availableThreads == 0) continue;
-			const gt: number = Math.min(Math.floor(growRatio * availableThreads));
-			const wt: number = Math.min(Math.floor(weakenRatio * availableThreads), weakenThreads);
-			if (gt > 0 && this.ns.hasRootAccess(server)) this.ns.exec(this.workers.grow, server, gt, gt, 0, target);
-			if (wt > 0 && this.ns.hasRootAccess(server)) this.ns.exec(this.workers.weaken, server, wt, wt, 0, target);
-			growThreads -= gt;
-			weakenThreads -= wt;
-			if (growThreads <= 0 && weakenThreads <= 0) break;
-		}
-	}
-	// https://github.com/emirdero/bitburner_scripts/blob/main/pwn.js#L45
-	async execute(target: string, reservedRam: number): Promise<void> {
-		this.copy(target);
-		const weakenTime: number = this.ns.getWeakenTime(target);
-		const delayInc: number = 1;
-		let runningDelay: number = 0;
-		const hDelay: number = Math.floor(weakenTime - this.ns.getHackTime(target));
-		const gDelay: number = Math.floor(weakenTime - this.ns.getGrowTime(target)) + 2 * delayInc;
-		const ramPerThread: number = this.ns.getScriptRam(this.workers.grow, 'home');
-		const { hackThreads, w1Threads, growThreads, w2Threads, totalThreads } = this.genBatches(target);
-		if (w1Threads == 0 || w2Threads == 0 || growThreads == 0 || hackThreads == 0) {
-			this.logger.error('Could not spin up batch due to error in thread allocation!', {
-				hackThreads,
-				w1Threads,
-				w2Threads,
-				growThreads,
-				totalThreads,
-			});
-			return;
-		}
-		for (const server of this.args.serverList) {
-			let availableRam: number = this.ns.getServerMaxRam(server) - this.ns.getServerUsedRam(server);
-			const availableThreads: number = Math.floor(availableRam / ramPerThread);
-			if (server == 'home') availableRam -= reservedRam;
-			const cycles: number = Math.floor(availableThreads / totalThreads);
-			for (let i = 0; i < Math.min(cycles, 10000); i++) {
-				this.ns.exec(this.workers.hack, server, hackThreads, hackThreads, hDelay + runningDelay, target);
-				this.ns.exec(this.workers.weaken, server, w1Threads, w1Threads, delayInc + runningDelay, target);
-				this.ns.exec(this.workers.grow, server, growThreads, growThreads, gDelay + runningDelay, target);
-				this.ns.exec(this.workers.weaken, server, w2Threads, w2Threads, delayInc * 3 + runningDelay, target);
-				runningDelay += 4 * delayInc;
-			}
-		}
-		for (const server of this.args.serverList) {
-			let availableRam: number = this.ns.getServerMaxRam(server) - this.ns.getServerUsedRam(server);
-			if (server == 'home') availableRam -= reservedRam;
-			const availableThreads: number = Math.floor(availableRam / ramPerThread);
-			const growThreads: number = Math.floor(availableThreads / 2);
-			const weakenThreads: number = Math.ceil(availableThreads / 2);
-			if (growThreads > 0)
-				this.ns.exec(this.workers.grow, server, growThreads, growThreads, gDelay + runningDelay + 100, target);
-			if (weakenThreads > 0)
-				this.ns.exec(this.workers.weaken, server, weakenThreads, weakenThreads, runningDelay + 200, target);
-		}
-		await this.ns.sleep(weakenTime + runningDelay + 2000);
-		return;
+		this.logger = new Logger(ns, 'batcherV2');
+		this.marginForError = 1.01;
+		this.hackPercent = 0.25;
 	}
 	/**
 	 * @returns True if this server's security is at the lowest possible value, and that the money available is equal to the maximum money available on the server. False otherwise.
@@ -124,5 +32,105 @@ export class Batcher extends BaseServer {
 			return true;
 		}
 		return false;
+	}
+	protected prepareBatchThreads(target: string): BatchThreads {
+		const moneyPerHack: number = this.ns.getServerMaxMoney(target) * this.hackPercent;
+		const hackThreads: number = Math.floor(this.ns.hackAnalyzeThreads(target, moneyPerHack));
+		const growThreads: number = Math.ceil(
+			this.marginForError * this.ns.growthAnalyze(target, 1 / (1 - this.hackPercent)),
+		);
+		const securityChangePerHack: number = this.marginForError * this.ns.hackAnalyzeSecurity(hackThreads);
+		const securityChangePerGrow: number = this.marginForError * this.ns.growthAnalyzeSecurity(growThreads);
+		let w1Threads: number = Math.ceil(securityChangePerHack / 0.05);
+		let w2Threads: number = Math.ceil(securityChangePerGrow / 0.05);
+		while (this.ns.weakenAnalyze(w1Threads) < securityChangePerHack) w1Threads += 5;
+		while (this.ns.weakenAnalyze(w2Threads) < securityChangePerGrow) w2Threads += 5;
+		const totalThreads: number = hackThreads + w1Threads + growThreads + w2Threads;
+		return {
+			hackThreads: hackThreads,
+			w1Threads: w1Threads,
+			growThreads: growThreads,
+			w2Threads: w2Threads,
+			totalThreads: totalThreads,
+		};
+	}
+	prepServer(target: string): void {
+		this.recursiveScan();
+		const ramPerThread: number = this.ns.getScriptRam(this.workers.grow, 'home');
+		const preparePrepThreads = (target: string) => {
+			const growAmt: number = this.ns.getServerMaxMoney(target) / this.ns.getServerMoneyAvailable(target);
+			const growThreads: number = Math.ceil(this.ns.growthAnalyze(target, growAmt));
+			const securityChangePerGrow: number = this.ns.growthAnalyzeSecurity(growThreads);
+			// Distance to minimum security level, in terms of weaken threads.
+			const distanceToMinSecurity: number =
+				(this.ns.getServerSecurityLevel(target) - this.ns.getServerMinSecurityLevel(target)) / 0.05;
+			const weakenThreads: number = Math.ceil(securityChangePerGrow + distanceToMinSecurity);
+			return { growThreads: growThreads, weakenThreads: weakenThreads } as PrepThreads;
+		};
+		let { growThreads, weakenThreads } = preparePrepThreads(target);
+		const growRatio: number = growThreads / (growThreads + weakenThreads);
+		const weakenRatio: number = weakenThreads / (growThreads + weakenThreads);
+		for (const server of this.serverList) {
+			const availableRam: number = this.ns.getServerMaxRam(server) - this.ns.getServerUsedRam(server);
+			const availableThreads: number = Math.floor(availableRam / ramPerThread);
+			if (availableThreads == 0) continue;
+			const growPrepThreads: number = Math.min(Math.floor(growRatio * availableThreads));
+			const weakenPrepThreads: number = Math.min(Math.floor(weakenRatio * availableThreads), weakenThreads);
+			if (growPrepThreads > 0 && this.ns.hasRootAccess(server))
+				this.ns.exec(this.workers.grow, server, growPrepThreads, growPrepThreads, 0, target);
+			if (weakenPrepThreads > 0 && this.ns.hasRootAccess(server))
+				this.ns.exec(this.workers.weaken, server, weakenPrepThreads, weakenPrepThreads, 0, target);
+			growThreads -= growPrepThreads;
+			weakenThreads -= weakenPrepThreads;
+			if (growThreads <= 0 && weakenThreads <= 0) break;
+		}
+	}
+	async runBatch(target: string, reservedRam: number): Promise<void> {
+		this.recursiveScan();
+		this.copyToSingleServer(target);
+		const timeToWeaken: number = this.ns.getWeakenTime(target);
+		let delay: number = 0;
+		const hackDelayTime: number = Math.floor(timeToWeaken - this.ns.getHackTime(target));
+		const growDelayTime: number = Math.floor(timeToWeaken - this.ns.getGrowTime(target));
+		const ramPerThread: number = this.ns.getScriptRam(this.workers.grow, 'home');
+		const { hackThreads, w1Threads, growThreads, w2Threads, totalThreads } = this.prepareBatchThreads(target);
+		if (w1Threads == 0 || w2Threads == 0 || growThreads == 0 || hackThreads == 0) {
+			this.logger.error('Could not spin up batch due to error in thread allocation!', {
+				hackThreads,
+				w1Threads,
+				w2Threads,
+				growThreads,
+				totalThreads,
+			});
+			return;
+		}
+		for (const server of this.serverList) {
+			let availableRam: number = this.ns.getServerMaxRam(server) - this.ns.getServerUsedRam(server);
+			if (server == 'home') availableRam -= reservedRam;
+			const availableThreads: number = Math.floor(availableRam / ramPerThread);
+			const cycles: number = Math.floor(availableThreads / totalThreads);
+			for (let i = 0; i < Math.min(cycles, 10000); i++) {
+				this.ns.exec(this.workers.hack, server, hackThreads, hackThreads, hackDelayTime + delay, target);
+				this.ns.exec(this.workers.weaken, server, w1Threads, w1Threads, delay, target);
+				this.ns.exec(this.workers.grow, server, growThreads, growThreads, growDelayTime + delay, target);
+				this.ns.exec(this.workers.weaken, server, w2Threads, w2Threads, 3 + delay, target);
+				delay += 4;
+			}
+		}
+		for (const server of this.serverList) {
+			let availableRam: number = this.ns.getServerMaxRam(server) - this.ns.getServerUsedRam(server);
+			if (server == 'home') availableRam -= reservedRam;
+			const availableThreads: number = Math.floor(availableRam / ramPerThread);
+			const growThreads: number = Math.floor(availableThreads / 2);
+			const weakenThreads: number = Math.ceil(availableThreads / 2);
+			if (growThreads > 0) {
+				this.ns.exec(this.workers.grow, server, growThreads, growThreads, growDelayTime + delay + 100, target);
+			}
+			if (weakenThreads > 0) {
+				this.ns.exec(this.workers.weaken, server, weakenThreads, weakenThreads, delay + 200, target);
+			}
+		}
+		await this.ns.sleep(timeToWeaken + delay + 2000);
+		return;
 	}
 }
