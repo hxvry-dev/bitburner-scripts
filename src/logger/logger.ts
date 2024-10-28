@@ -1,14 +1,20 @@
-import { NS } from '@ns';
+import { NetscriptPort, NS } from '@ns';
 
-type LogLevel = 'INFO' | 'WARN' | 'ERROR' | 'DEBUG';
+type LogLevel = 'INFO' | 'WARN' | 'ERROR' | 'DEBUG' | 'EPOCH';
 export class Logger {
 	private ns: NS;
-	private logPort: number;
 	private name?: string;
+	public logPort: number;
+	public _epoch: string;
 	constructor(ns: NS, logName: string = '') {
 		this.ns = ns;
 		this.logPort = 20;
 		this.name = logName ? logName : '';
+		this._epoch = '';
+	}
+	get epoch() {
+		this._epoch = Date.now().toString();
+		return `${this.colors.CYAN}${this._epoch}${this.colors.RESET}`;
 	}
 	private colors = {
 		BLACK: '\u001b[30m',
@@ -81,6 +87,7 @@ export class Logger {
 		return `${logTsFormatStr}${logLevelFormatStr}${logNameFormatStr}${ptrFormatStr}${logMsgFormatStr}${this.colors.RESET}`;
 	}
 	private log(level: LogLevel, msg: string, args: Array<object | string>): void {
+		const port: NetscriptPort = this.ns.getPortHandle(this.logPort);
 		for (let i = 0; i < args.length; i++) {
 			if (!Array.isArray(args[i])) {
 				args[i] = `${this.colors.SLATE_BLUE}${JSON.stringify(args[i], null, 4)}`;
@@ -89,21 +96,19 @@ export class Logger {
 			}
 			msg = `${msg}\n${args[i]}`;
 		}
-		this.ns.print(this.msg(level, msg));
+		const data: string = this.msg(level, msg);
+		port.tryWrite(data);
 	}
-	info(msg: string, ...args: Array<object | string>) {
+	info(msg: string, ...args: Array<object | string>): void {
 		this.log('INFO', msg, args);
 	}
-	warn(msg: string, ...args: Array<object | string>) {
+	warn(msg: string, ...args: Array<object | string>): void {
 		this.log('WARN', msg, args);
 	}
-	error(msg: string, ...args: Array<object | string>) {
+	error(msg: string, ...args: Array<object | string>): void {
 		this.log('ERROR', msg, args);
 	}
-	debug(msg: string, ...args: Array<object | string>) {
+	debug(msg: string, ...args: Array<object | string>): void {
 		this.log('DEBUG', msg, args);
-	}
-	epoch(): number {
-		return Date.now();
 	}
 }

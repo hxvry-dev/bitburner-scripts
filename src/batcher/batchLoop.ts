@@ -8,6 +8,7 @@ export async function main(ns: NS): Promise<void> {
 	const batcher: Batcher = new Batcher(ns, target);
 	const reservedRam: number = (ns.args[1] as number) ?? 20;
 	while (true) {
+		if (!ns.scriptRunning('dashboard.js', 'home')) return;
 		if (!batcher.isPrepped(target)) {
 			batcher.prepServer(target);
 			await ns.sleep(ns.getWeakenTime(target) + 1000);

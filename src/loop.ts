@@ -40,13 +40,9 @@ export async function main(ns: NS): Promise<void> {
 			} catch {
 				/* empty */
 			}
-			server.copyToSingleServer(server.hostname, server.scriptNames.all);
 			server.generateServerReport;
-			if (!server.generalInfo.hasAdminRights) {
-				server.rootSingleServer(server.generalInfo.hostname);
-				if (server.generalInfo.hasAdminRights) {
-					rootedHosts.add(server.generalInfo.hostname);
-				}
+			if (server.generalInfo.hasAdminRights) {
+				rootedHosts.add(server.generalInfo.hostname);
 			}
 			if (
 				server.generalInfo.hostname !== 'home' &&

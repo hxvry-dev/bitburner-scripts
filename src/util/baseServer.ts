@@ -10,7 +10,7 @@ export class BaseServer {
 	protected workers: BatchScriptBundle;
 	protected hackPrograms: string[];
 	protected serverList: string[];
-	constructor(ns: NS, hostname: string) {
+	constructor(ns: NS, hostname?: string) {
 		this.ns = ns;
 		this.logger = new Logger(ns, 'baseServerV2');
 		this.hostname = hostname ? hostname : this.ns.getHostname();
@@ -23,10 +23,13 @@ export class BaseServer {
 			all: [],
 		};
 		this.serverList = this.recursiveScan();
+		this.copy(this.workers.all);
+		this.root();
 
 		const killLogs: string[] = [
 			'scan',
 			'sleep',
+			'exec',
 			'getHackingLevel',
 			'killall',
 			'getServerMaxRam',
@@ -34,6 +37,7 @@ export class BaseServer {
 			'getServerMinSecurityLevel',
 			'getServerSecurityLevel',
 			'getServerMaxMoney',
+			'getServerMoneyAvailable',
 		];
 		killLogs.forEach((log) => {
 			this.ns.disableLog(log);
@@ -65,57 +69,63 @@ export class BaseServer {
 		return servers;
 	}
 	/**
-	 * Tries to copy the specified hacking scripts to the specified target server
+	 * Tries to copy the specified hacking scripts to all specified target servers
 	 */
-	copyToSingleServer(hostname: string, scripts: string[]): void {
-		for (const script of scripts) {
-			if (!this.ns.fileExists(script, hostname)) {
-				this.ns.scp(script, hostname, 'home');
+	copy(scripts: string[]): void {
+		const hosts: string[] = this.recursiveScan();
+		for (const hostname of hosts) {
+			for (const script of scripts) {
+				if (!this.ns.fileExists(script, hostname)) {
+					this.ns.scp(script, hostname, 'home');
+				}
 			}
 		}
 	}
 	/**
 	 * Attempts to gain root/adminstrator permissions on the target server.
 	 */
-	rootSingleServer(hostname: string): void {
-		let openPorts: number = 0;
-		if (this.data.hasAdminRights) {
-			return;
-		}
-		try {
-			this.ns.nuke(hostname);
-		} catch {
-			if (this.ns.fileExists('brutessh.exe', 'home')) {
-				this.ns.brutessh(hostname);
-				openPorts += 1;
+	root(): void {
+		const serverList: string[] = this.recursiveScan();
+		for (const server of serverList) {
+			let openPorts: number = 0;
+			if (this.data.hasAdminRights) {
+				return;
 			}
-			if (this.ns.fileExists('ftpcrack.exe', 'home')) {
-				this.ns.ftpcrack(hostname);
-				openPorts += 1;
-			}
-			if (this.ns.fileExists('relaysmtp.exe', 'home')) {
-				this.ns.relaysmtp(hostname);
-				openPorts += 1;
-			}
-			if (this.ns.fileExists('httpworm.exe', 'home')) {
-				this.ns.httpworm(hostname);
-				openPorts += 1;
-			}
-			if (this.ns.fileExists('sqlinject.exe', 'home')) {
-				this.ns.sqlinject(hostname);
-				openPorts += 1;
-			}
-			if (this.data.numOpenPortsRequired! <= openPorts) {
-				this.ns.nuke(hostname);
-				this.ns.scp(
-					[
-						'batcher/payloads/batchGrow.js',
-						'batcher/payloads/batchHack.js',
-						'batcher/payloads/batchWeaken.js',
-					],
-					hostname,
-					'home',
-				);
+			try {
+				this.ns.nuke(server);
+			} catch {
+				if (this.ns.fileExists('brutessh.exe', 'home')) {
+					this.ns.brutessh(server);
+					openPorts += 1;
+				}
+				if (this.ns.fileExists('ftpcrack.exe', 'home')) {
+					this.ns.ftpcrack(server);
+					openPorts += 1;
+				}
+				if (this.ns.fileExists('relaysmtp.exe', 'home')) {
+					this.ns.relaysmtp(server);
+					openPorts += 1;
+				}
+				if (this.ns.fileExists('httpworm.exe', 'home')) {
+					this.ns.httpworm(server);
+					openPorts += 1;
+				}
+				if (this.ns.fileExists('sqlinject.exe', 'home')) {
+					this.ns.sqlinject(server);
+					openPorts += 1;
+				}
+				if (this.data.numOpenPortsRequired! <= openPorts) {
+					this.ns.nuke(server);
+					this.ns.scp(
+						[
+							'batcher/payloads/batchGrow.js',
+							'batcher/payloads/batchHack.js',
+							'batcher/payloads/batchWeaken.js',
+						],
+						server,
+						'home',
+					);
+				}
 			}
 		}
 	}

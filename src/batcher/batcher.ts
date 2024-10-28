@@ -9,7 +9,7 @@ export class Batcher extends BaseServer {
 
 	private marginForError: number;
 	private hackPercent: number;
-	constructor(ns: NS, hostname: string) {
+	constructor(ns: NS, hostname?: string) {
 		super(ns, hostname);
 		this.workers = {
 			hack: 'batcher/payloads/batchHack.js',
@@ -17,7 +17,7 @@ export class Batcher extends BaseServer {
 			weaken: 'batcher/payloads/batchWeaken.js',
 			all: ['batcher/payloads/batchHack.js', 'batcher/payloads/batchGrow.js', 'batcher/payloads/batchWeaken.js'],
 		};
-		this.logger = new Logger(ns, 'batcherV2');
+		this.logger = new Logger(ns, 'Batcher');
 		this.marginForError = 1.01;
 		this.hackPercent = 0.25;
 	}
@@ -46,6 +46,13 @@ export class Batcher extends BaseServer {
 		while (this.ns.weakenAnalyze(w1Threads) < securityChangePerHack) w1Threads += 5;
 		while (this.ns.weakenAnalyze(w2Threads) < securityChangePerGrow) w2Threads += 5;
 		const totalThreads: number = hackThreads + w1Threads + growThreads + w2Threads;
+		this.logger.debug('BatchThreads', {
+			hackThreads: hackThreads,
+			w1Threads: w1Threads,
+			growThreads: growThreads,
+			w2Threads: w2Threads,
+			totalThreads: totalThreads,
+		});
 		return {
 			hackThreads: hackThreads,
 			w1Threads: w1Threads,
@@ -71,7 +78,6 @@ export class Batcher extends BaseServer {
 		const growRatio: number = growThreads / (growThreads + weakenThreads);
 		const weakenRatio: number = weakenThreads / (growThreads + weakenThreads);
 		for (const server of serverList) {
-			this.copyToSingleServer(target, this.workers.all);
 			const availableRam: number = this.ns.getServerMaxRam(server) - this.ns.getServerUsedRam(server);
 			const availableThreads: number = Math.floor(availableRam / ramPerThread);
 			if (availableThreads == 0) continue;
@@ -94,6 +100,8 @@ export class Batcher extends BaseServer {
 		const growDelayTime: number = Math.floor(timeToWeaken - this.ns.getGrowTime(target));
 		const ramPerThread: number = this.ns.getScriptRam(this.workers.grow, 'home');
 		const { hackThreads, w1Threads, growThreads, w2Threads, totalThreads } = this.prepareBatchThreads(target);
+		const serverInfoPre: Array<object> = [];
+		const serverInfoPost: Array<object> = [];
 		if (w1Threads == 0 || w2Threads == 0 || growThreads == 0 || hackThreads == 0) {
 			this.logger.error('Could not spin up batch due to error in thread allocation!', {
 				hackThreads,
@@ -105,9 +113,11 @@ export class Batcher extends BaseServer {
 			return;
 		}
 		for (const server of serverList) {
-			let availableRam: number = this.ns.getServerMaxRam(server) - this.ns.getServerUsedRam(server);
+			let availableRam: number =
+				Math.floor(this.ns.getServerMaxRam(server)) - Math.floor(this.ns.getServerUsedRam(server));
 			if (server == 'home') availableRam -= reservedRam;
 			const availableThreads: number = Math.floor(availableRam / ramPerThread);
+			serverInfoPre.push({ server: server, availableRam: availableRam, availableThreads: availableThreads });
 			const cycles: number = Math.floor(availableThreads / totalThreads);
 			for (let i = 0; i < Math.min(cycles, 10000); i++) {
 				this.ns.exec(this.workers.hack, server, hackThreads, hackThreads, hackDelayTime + delay, target);
@@ -118,9 +128,11 @@ export class Batcher extends BaseServer {
 			}
 		}
 		for (const server of serverList) {
-			let availableRam: number = this.ns.getServerMaxRam(server) - this.ns.getServerUsedRam(server);
+			let availableRam: number =
+				Math.floor(this.ns.getServerMaxRam(server)) - Math.floor(this.ns.getServerUsedRam(server));
 			if (server == 'home') availableRam -= reservedRam;
 			const availableThreads: number = Math.floor(availableRam / ramPerThread);
+			serverInfoPost.push({ server: server, availableRam: availableRam, availableThreads: availableThreads });
 			const growThreads: number = Math.floor(availableThreads / 2);
 			const weakenThreads: number = Math.ceil(availableThreads / 2);
 			if (growThreads > 0) {
@@ -130,6 +142,8 @@ export class Batcher extends BaseServer {
 				this.ns.exec(this.workers.weaken, server, weakenThreads, weakenThreads, delay + 200, target);
 			}
 		}
+		this.logger.debug('Server Information Pre-Allocation => ', serverInfoPre);
+		this.logger.debug('Server Information Post-Allocation => ', serverInfoPost);
 		await this.ns.sleep(timeToWeaken + delay + 2000);
 		return;
 	}
