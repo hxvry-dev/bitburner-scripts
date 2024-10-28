@@ -24,7 +24,17 @@ export class BaseServer {
 		};
 		this.serverList = this.recursiveScan();
 
-		const killLogs: string[] = ['scan', 'getHackingLevel', 'killall'];
+		const killLogs: string[] = [
+			'scan',
+			'sleep',
+			'getHackingLevel',
+			'killall',
+			'getServerMaxRam',
+			'getServerUsedRam',
+			'getServerMinSecurityLevel',
+			'getServerSecurityLevel',
+			'getServerMaxMoney',
+		];
 		killLogs.forEach((log) => {
 			this.ns.disableLog(log);
 		});
@@ -57,9 +67,8 @@ export class BaseServer {
 	/**
 	 * Tries to copy the specified hacking scripts to the specified target server
 	 */
-	copyToSingleServer(hostname: string): void {
-		const scripts: BatchScriptBundle = this.workers;
-		for (const script of scripts.all) {
+	copyToSingleServer(hostname: string, scripts: string[]): void {
+		for (const script of scripts) {
 			if (!this.ns.fileExists(script, hostname)) {
 				this.ns.scp(script, hostname, 'home');
 			}

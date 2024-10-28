@@ -55,7 +55,7 @@ export class Batcher extends BaseServer {
 		};
 	}
 	prepServer(target: string): void {
-		this.recursiveScan();
+		const serverList: string[] = this.recursiveScan();
 		const ramPerThread: number = this.ns.getScriptRam(this.workers.grow, 'home');
 		const preparePrepThreads = (target: string) => {
 			const growAmt: number = this.ns.getServerMaxMoney(target) / this.ns.getServerMoneyAvailable(target);
@@ -70,7 +70,8 @@ export class Batcher extends BaseServer {
 		let { growThreads, weakenThreads } = preparePrepThreads(target);
 		const growRatio: number = growThreads / (growThreads + weakenThreads);
 		const weakenRatio: number = weakenThreads / (growThreads + weakenThreads);
-		for (const server of this.serverList) {
+		for (const server of serverList) {
+			this.copyToSingleServer(target, this.workers.all);
 			const availableRam: number = this.ns.getServerMaxRam(server) - this.ns.getServerUsedRam(server);
 			const availableThreads: number = Math.floor(availableRam / ramPerThread);
 			if (availableThreads == 0) continue;
@@ -86,8 +87,7 @@ export class Batcher extends BaseServer {
 		}
 	}
 	async runBatch(target: string, reservedRam: number): Promise<void> {
-		this.recursiveScan();
-		this.copyToSingleServer(target);
+		const serverList: string[] = this.recursiveScan();
 		const timeToWeaken: number = this.ns.getWeakenTime(target);
 		let delay: number = 0;
 		const hackDelayTime: number = Math.floor(timeToWeaken - this.ns.getHackTime(target));
@@ -104,7 +104,7 @@ export class Batcher extends BaseServer {
 			});
 			return;
 		}
-		for (const server of this.serverList) {
+		for (const server of serverList) {
 			let availableRam: number = this.ns.getServerMaxRam(server) - this.ns.getServerUsedRam(server);
 			if (server == 'home') availableRam -= reservedRam;
 			const availableThreads: number = Math.floor(availableRam / ramPerThread);
@@ -117,7 +117,7 @@ export class Batcher extends BaseServer {
 				delay += 4;
 			}
 		}
-		for (const server of this.serverList) {
+		for (const server of serverList) {
 			let availableRam: number = this.ns.getServerMaxRam(server) - this.ns.getServerUsedRam(server);
 			if (server == 'home') availableRam -= reservedRam;
 			const availableThreads: number = Math.floor(availableRam / ramPerThread);
