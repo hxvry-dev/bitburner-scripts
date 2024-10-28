@@ -30,7 +30,7 @@ export async function main(ns: NS): Promise<void> {
 		const ram: number = Math.min(maxRAM, Math.pow(2, multiplier));
 		const cost: number = ns.getPurchasedServerCost(ram);
 
-		const servers: IServer[] = new IServer(ns).serverList;
+		const servers: IServer[] = new IServer(ns).IServerList;
 		for (const server of servers) {
 			try {
 				if (!isKilled) {
@@ -40,10 +40,10 @@ export async function main(ns: NS): Promise<void> {
 			} catch {
 				/* empty */
 			}
-			server.copy(server.hostname, true);
+			server.copyToSingleServer(server.hostname);
 			server.generateServerReport;
 			if (!server.generalInfo.hasAdminRights) {
-				server.root();
+				server.rootSingleServer(server.generalInfo.hostname);
 				if (server.generalInfo.hasAdminRights) {
 					rootedHosts.add(server.generalInfo.hostname);
 				}
@@ -56,20 +56,20 @@ export async function main(ns: NS): Promise<void> {
 					const threads: number = server.threadCount(1.75);
 					if (threads >= 1) {
 						for (const idx of servers) {
-							ns.exec(idx.scriptNames.weaken, idx.hostname, { threads: threads }, 'n00dles');
+							idx.exec(server.generalInfo.hostname, server.scriptNames.weaken, threads);
 						}
 					}
 				} else if (server.moneyInfo.moneyAvailable! <= server.moneyInfo.moneyMax!) {
 					const threads: number = server.threadCount(1.75);
 					if (threads >= 1) {
 						for (const idx of servers) {
-							ns.exec(idx.scriptNames.grow, idx.hostname, { threads: threads }, 'n00dles');
+							idx.exec(server.generalInfo.hostname, server.scriptNames.grow, threads);
 						}
 					}
 				} else {
 					const threads: number = server.threadCount(1.7);
 					for (const idx of servers) {
-						ns.exec(idx.scriptNames.hack, idx.hostname, { threads: threads }, 'n00dles');
+						idx.exec(server.generalInfo.hostname, server.scriptNames.hack, threads);
 					}
 				}
 			}

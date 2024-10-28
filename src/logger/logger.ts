@@ -4,7 +4,7 @@ type LogLevel = 'INFO' | 'WARN' | 'ERROR' | 'DEBUG';
 export class Logger {
 	private ns: NS;
 	private logPort: number;
-	name?: string;
+	private name?: string;
 	constructor(ns: NS, logName: string = '') {
 		this.ns = ns;
 		this.logPort = 20;
@@ -67,20 +67,14 @@ export class Logger {
 	 */
 	private ts() {
 		const today: Date = new Date();
-		const epoch: number = Date.now();
-		return {
-			logTsFormat: `> ${today.getFullYear()}-${today.getMonth()}-${today.getDay()} ${today.getHours()}:${today.getMinutes()}:${today.getSeconds()}.${today.getMilliseconds()} - `,
-			epoch: epoch,
-		};
+		return `> ${today.getFullYear()}-${today.getMonth()}-${today.getDay()} ${today.getHours()}:${today.getMinutes()}:${today.getSeconds()}.${today.getMilliseconds()} - `;
 	}
 	private msg(level: LogLevel, _msg: string) {
-		const { logTsFormat, epoch } = this.ts();
+		const logTsFormat = this.ts();
 
 		const logTsFormatStr: string = `${this.colors.GREY}${logTsFormat}`;
 		const logLevelFormatStr: string = `${this.colorByLevel(level.toLowerCase())}[${level}]`;
-		const logNameFormatStr: string = this.name?.length
-			? ` ${this.colors.YELLOW}(${this.name})`
-			: `${this.colors.MAGENTA}${epoch}`;
+		const logNameFormatStr: string = this.name?.length ? ` ${this.colors.YELLOW}(${this.name})` : ``;
 		const logMsgFormatStr: string = ` ${this.colors.WHITE}${_msg}`;
 		const ptrFormatStr: string = `${this.colors.WHITE}> `;
 
@@ -108,5 +102,8 @@ export class Logger {
 	}
 	debug(msg: string, ...args: Array<object | string>) {
 		this.log('DEBUG', msg, args);
+	}
+	epoch(): number {
+		return Date.now();
 	}
 }
