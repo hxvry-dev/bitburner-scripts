@@ -2,10 +2,10 @@ import { NetscriptPort, NS } from '@ns';
 
 type LogLevel = 'INFO' | 'WARN' | 'ERROR' | 'DEBUG' | 'EPOCH';
 export class Logger {
-	private ns: NS;
-	private name?: string;
 	public logPort: number;
-	public _epoch: string;
+	protected ns: NS;
+	protected name?: string;
+	protected _epoch: string;
 	constructor(ns: NS, logName: string = '') {
 		this.ns = ns;
 		this.logPort = 20;
@@ -16,7 +16,7 @@ export class Logger {
 		this._epoch = Date.now().toString();
 		return `${this.colors.CYAN}${this._epoch}${this.colors.RESET}`;
 	}
-	private colors = {
+	protected colors = {
 		BLACK: '\u001b[30m',
 		WHITE: '\u001B[37m',
 		RED: '\u001B[31m',
@@ -41,7 +41,7 @@ export class Logger {
 	 *
 	 * Example: {red_background}[ERROR]{color_reset}
 	 */
-	private colorByLevel(level: string): string {
+	protected colorByLevel(level: string): string {
 		let color: string = '';
 		switch (level) {
 			case 'info': {
@@ -71,11 +71,11 @@ export class Logger {
 	 *
 	 * @returns Generated timestamp and UNIX timestamp for logging purposes.
 	 */
-	private ts() {
+	protected ts() {
 		const today: Date = new Date();
 		return `> ${today.getFullYear()}-${today.getMonth()}-${today.getDay()} ${today.getHours()}:${today.getMinutes()}:${today.getSeconds()}.${today.getMilliseconds()} - `;
 	}
-	private msg(level: LogLevel, _msg: string) {
+	protected msg(level: LogLevel, _msg: string) {
 		const logTsFormat = this.ts();
 
 		const logTsFormatStr: string = `${this.colors.GREY}${logTsFormat}`;
@@ -86,7 +86,7 @@ export class Logger {
 
 		return `${logTsFormatStr}${logLevelFormatStr}${logNameFormatStr}${ptrFormatStr}${logMsgFormatStr}${this.colors.RESET}`;
 	}
-	private log(level: LogLevel, msg: string, args: Array<object | string>): void {
+	protected log(level: LogLevel, msg: string, args: Array<object | string>): void {
 		const port: NetscriptPort = this.ns.getPortHandle(this.logPort);
 		for (let i = 0; i < args.length; i++) {
 			if (!Array.isArray(args[i])) {

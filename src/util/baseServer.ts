@@ -3,7 +3,7 @@ import { NS, Server } from '@ns';
 import { BatchScriptBundle } from '@/util/types';
 
 export class BaseServer {
-	public hostname: string;
+	protected hostname: string;
 	protected ns: NS;
 	protected logger: Logger;
 	protected data: Server;
@@ -46,7 +46,7 @@ export class BaseServer {
 	/**
 	 * @returns An array of all server hostnames.
 	 */
-	recursiveScan(debug?: boolean): Array<string> {
+	protected recursiveScan(debug?: boolean): Array<string> {
 		const visited: Set<string> = new Set<string>();
 		const queue: string[] = ['home'];
 		const servers: string[] = [];
@@ -71,7 +71,7 @@ export class BaseServer {
 	/**
 	 * Tries to copy the specified hacking scripts to all specified target servers
 	 */
-	copy(scripts: string[]): void {
+	protected copy(scripts: string[]): void {
 		const hosts: string[] = this.recursiveScan();
 		for (const hostname of hosts) {
 			for (const script of scripts) {
@@ -84,7 +84,7 @@ export class BaseServer {
 	/**
 	 * Attempts to gain root/adminstrator permissions on the target server.
 	 */
-	root(): void {
+	protected root(): void {
 		const serverList: string[] = this.recursiveScan();
 		for (const server of serverList) {
 			let openPorts: number = 0;
@@ -130,7 +130,7 @@ export class BaseServer {
 	/**
 	 * Attempts to force kill any/all scripts running on the target server.
 	 */
-	killAll(): void {
+	protected killAll(): void {
 		const servers: string[] = this.recursiveScan();
 		let killedScripts: number = 0;
 		servers.forEach((target) => {
@@ -148,14 +148,5 @@ export class BaseServer {
 		} else {
 			this.logger.info(`# Killed Scripts This Run: ${killedScripts}`);
 		}
-	}
-	generateServerName() {
-		const chars: string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
-		const length: number = 5;
-		let result: string = '';
-		for (let i = 0; i < length; i++) {
-			result += chars.charAt(Math.floor(Math.random() * chars.length));
-		}
-		return result;
 	}
 }
