@@ -11,7 +11,7 @@ export async function main(ns: NS): Promise<void> {
 	const pServer: PServer = new PServer(ns);
 	while (true) {
 		if (!ns.scriptRunning('dashboard.js', 'home')) return;
-		pServer.run();
+		await pServer.run();
 		if (!batcher.isPrepped(target)) {
 			batcher.prepServer(target);
 			await ns.sleep(ns.getWeakenTime(target) + 1000);

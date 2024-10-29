@@ -45,27 +45,31 @@ export class PServer extends BaseServer {
 		while (ram < potentialMaxRam) this.mult++;
 		return ram;
 	}
-	protected purchase(ram: number): void {
+	protected async purchase(ram: number): Promise<void> {
 		const cost: number = this.ns.getPurchasedServerCost(ram);
-		const cash: number = this.ns.getServerMoneyAvailable('home');
-		const name: string = `pserv-${this.generateServerName()}`;
+		let cash: number = this.ns.getServerMoneyAvailable('home');
 		if (this.pServerList.length < this.ns.getPurchasedServerLimit()) {
 			if (cost <= cash) {
-				this.ns.purchaseServer(name, ram);
-				this.logger.info(
-					`Purchased Server (Hostname: ${name}) with ${ram} GB of RAM for ${Intl.NumberFormat('en-US', {
-						style: 'currency',
-						currency: 'USD',
-					}).format(cost)}`,
-				);
-				this.copy(this.workers.all);
-				this.pServerList = this.ns
-					.getPurchasedServers()
-					.sort((a, b) => this.ns.getServerMaxRam(a) - this.ns.getServerMaxRam(b));
+				while (cash > cost) {
+					const name: string = `pserv-${this.generateServerName()}`;
+					this.ns.purchaseServer(name, ram);
+					this.logger.info(
+						`Purchased Server (Hostname: ${name}) with ${ram} GB of RAM for ${Intl.NumberFormat('en-US', {
+							style: 'currency',
+							currency: 'USD',
+						}).format(cost)}`,
+					);
+					this.copy(this.workers.all);
+					this.pServerList = this.ns
+						.getPurchasedServers()
+						.sort((a, b) => this.ns.getServerMaxRam(a) - this.ns.getServerMaxRam(b));
+					cash -= cost;
+					await this.ns.sleep(10);
+				}
 			}
 		}
 	}
-	protected upgradeAll(): void {
+	protected async upgradeAll(): Promise<void> {
 		let ram: number = this.calcRam();
 		this.pServerList = this.ns
 			.getPurchasedServers()
@@ -108,10 +112,10 @@ export class PServer extends BaseServer {
 				}
 			}
 		} else {
-			return this.purchase(ram);
+			return await this.purchase(ram);
 		}
 	}
-	run(): void {
-		return this.upgradeAll();
+	async run(): Promise<void> {
+		return await this.upgradeAll();
 	}
 }
