@@ -92,8 +92,6 @@ export class BaseServer {
 				return;
 			}
 			try {
-				this.ns.nuke(server);
-			} catch {
 				if (this.ns.fileExists('brutessh.exe', 'home')) {
 					this.ns.brutessh(server);
 					openPorts += 1;
@@ -126,7 +124,7 @@ export class BaseServer {
 						'home',
 					);
 				}
-			}
+			} catch {}
 		}
 	}
 	/**
@@ -150,5 +148,14 @@ export class BaseServer {
 		} else {
 			this.logger.info(`# Killed Scripts This Run: ${killedScripts}`);
 		}
+	}
+	generateServerName() {
+		const chars: string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
+		const length: number = 5;
+		let result: string = '';
+		for (let i = 0; i < length; i++) {
+			result += chars.charAt(Math.floor(Math.random() * chars.length));
+		}
+		return result;
 	}
 }
