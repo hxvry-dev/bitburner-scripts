@@ -4,12 +4,8 @@ Things to work on for the `bitburner-scripts` repo.
 
 ## Todo
 
-### Batcher
-
+- [ ] Fix the multiplier system.
 - [ ] Optimize/simplify the `batching` algorithm more.
-
-### Maybe BatchManager.ts?
-
 - [ ] Obtain `Formulas.exe`
   - [ ] Allow `Batcher`/`Manager` to purchase Hack Programs (Ex. BruteSSH.exe)
     - [ ] Have the `Batcher`/`Manager` script purchase `Formulas.exe` automatically.
