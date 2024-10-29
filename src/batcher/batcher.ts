@@ -20,6 +20,8 @@ export class Batcher extends BaseServer {
 		this.logger = new Logger(ns, 'Batcher');
 		this.marginForError = 1.01;
 		this.hackPercent = 0.25;
+		this.copy(this.workers.all);
+		this.root();
 	}
 	protected prepareBatchThreads(target: string): BatchThreads {
 		const moneyPerHack: number = this.ns.getServerMaxMoney(target) * this.hackPercent;
@@ -94,6 +96,7 @@ export class Batcher extends BaseServer {
 	}
 	async runBatch(target: string, reservedRam: number): Promise<void> {
 		const serverList: string[] = this.recursiveScan();
+		this.ns.tprint(serverList);
 		const timeToWeaken: number = this.ns.getWeakenTime(target);
 		let delay: number = 0;
 		const hackDelayTime: number = Math.floor(timeToWeaken - this.ns.getHackTime(target));

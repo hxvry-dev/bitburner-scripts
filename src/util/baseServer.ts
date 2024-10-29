@@ -23,8 +23,6 @@ export class BaseServer {
 			all: [],
 		};
 		this.serverList = this.recursiveScan();
-		this.copy(this.workers.all);
-		this.root();
 
 		const killLogs: string[] = [
 			'scan',
