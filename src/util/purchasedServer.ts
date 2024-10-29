@@ -27,7 +27,7 @@ export class PServer extends BaseServer {
 		}
 		return result;
 	}
-	protected async calcRam(): Promise<number> {
+	protected calcRam(): number {
 		let ram: number = Math.min(this.maxRam, Math.pow(2, this.mult));
 		const potentialMaxRam: number = this.pServerList.reduce<number>(
 			(a, e) => Math.max(a, this.ns.getServerMaxRam(e)),
@@ -36,11 +36,10 @@ export class PServer extends BaseServer {
 		while (ram < potentialMaxRam) {
 			this.mult++;
 			ram = Math.min(this.maxRam, Math.pow(2, this.mult));
-			await this.ns.sleep(100);
 		}
 		return ram;
 	}
-	protected async purchase(ram: number): Promise<void> {
+	protected _purchase(ram: number): void {
 		const cost: number = this.ns.getPurchasedServerCost(ram);
 		const cash: number = this.ns.getServerMoneyAvailable('home');
 		const name: string = `pserv-${this.generateServerName()}`;
@@ -54,8 +53,8 @@ export class PServer extends BaseServer {
 			}
 		}
 	}
-	async run(hostname: string): Promise<void> {
-		let ram: number = await this.calcRam();
+	protected _upgrade(hostname: string): void {
+		let ram: number = this.calcRam();
 		const cost: number = this.ns.getPurchasedServerUpgradeCost(hostname, ram);
 		const cash: number = this.ns.getServerMoneyAvailable('home');
 		const sorted: string[] = this.pServerList.sort(
@@ -70,13 +69,22 @@ export class PServer extends BaseServer {
 				this.pServerList = this.ns
 					.getPurchasedServers()
 					.sort((a, b) => this.ns.getServerMaxRam(a) - this.ns.getServerMaxRam(b));
+			} else {
+				this.ns.upgradePurchasedServer(sorted[0], ram);
+				this.logger.info(`Purchased Server (Hostname: ${hostname}) successfully upgraded to ${ram} GB of RAM!`);
+				this.pServerList = this.ns
+					.getPurchasedServers()
+					.sort((a, b) => this.ns.getServerMaxRam(a) - this.ns.getServerMaxRam(b));
 			}
 		} else if (!this.isFull && cost <= cash) {
-			this.purchase(ram);
+			this._purchase(ram);
 		}
 	}
-	async buy() {
-		const ram: number = await this.calcRam();
-		return await this.purchase(ram);
+	buy(): void {
+		const ram: number = this.calcRam();
+		return this._purchase(ram);
+	}
+	run(hostname: string): void {
+		return this._upgrade(hostname);
 	}
 }
