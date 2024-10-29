@@ -40,6 +40,7 @@ export class BaseServer {
 		killLogs.forEach((log) => {
 			this.ns.disableLog(log);
 		});
+		ns.clearLog();
 	}
 	/**
 	 * @returns An array of all server hostnames.

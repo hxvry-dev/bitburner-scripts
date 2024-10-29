@@ -9,18 +9,15 @@ export async function main(ns: NS): Promise<void> {
 	const batcher: Batcher = new Batcher(ns, target);
 	const reservedRam: number = (ns.args[1] as number) ?? 20;
 	const pServer: PServer = new PServer(ns);
-	pServer.buy();
 	while (true) {
 		if (!ns.scriptRunning('dashboard.js', 'home')) return;
+		pServer.run();
 		if (!batcher.isPrepped(target)) {
 			batcher.prepServer(target);
 			await ns.sleep(ns.getWeakenTime(target) + 1000);
 		} else {
 			await batcher.runBatch(target, reservedRam);
 			logger.info(`Batch finished successfully! ${logger.epoch}`);
-		}
-		for (const server of pServer.pServerList) {
-			pServer.run(server);
 		}
 	}
 }
