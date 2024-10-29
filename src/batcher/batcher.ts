@@ -7,8 +7,8 @@ export class Batcher extends BaseServer {
 	protected logger: Logger;
 	protected workers: BatchWorkerScript;
 
-	private marginForError: number;
-	private hackPercent: number;
+	protected marginForError: number;
+	protected hackPercent: number;
 	constructor(ns: NS, hostname?: string) {
 		super(ns, hostname);
 		this.workers = {
@@ -18,20 +18,11 @@ export class Batcher extends BaseServer {
 			all: ['batcher/payloads/batchHack.js', 'batcher/payloads/batchGrow.js', 'batcher/payloads/batchWeaken.js'],
 		};
 		this.logger = new Logger(ns, 'Batcher');
+
+		this.root();
+		this.copy(this.workers.all);
 		this.marginForError = 1.01;
 		this.hackPercent = 0.25;
-	}
-	/**
-	 * @returns True if this server's security is at the lowest possible value, and that the money available is equal to the maximum money available on the server. False otherwise.
-	 */
-	isPrepped(target: string): boolean {
-		if (
-			this.ns.getServerMinSecurityLevel(target) == this.ns.getServerSecurityLevel(target) &&
-			this.ns.getServerMoneyAvailable(target) == this.ns.getServerMaxMoney(target)
-		) {
-			return true;
-		}
-		return false;
 	}
 	protected prepareBatchThreads(target: string): BatchThreads {
 		const moneyPerHack: number = this.ns.getServerMaxMoney(target) * this.hackPercent;
@@ -61,8 +52,20 @@ export class Batcher extends BaseServer {
 			totalThreads: totalThreads,
 		};
 	}
+	/**
+	 * @returns True if this server's security is at the lowest possible value, and that the money available is equal to the maximum money available on the server. False otherwise.
+	 */
+	isPrepped(target: string): boolean {
+		if (
+			this.ns.getServerMinSecurityLevel(target) == this.ns.getServerSecurityLevel(target) &&
+			this.ns.getServerMoneyAvailable(target) == this.ns.getServerMaxMoney(target)
+		) {
+			return true;
+		}
+		return false;
+	}
 	prepServer(target: string): void {
-		const serverList: string[] = this.recursiveScan();
+		this.logger.info(`Prepping target: ${target}`);
 		const ramPerThread: number = this.ns.getScriptRam(this.workers.grow, 'home');
 		const preparePrepThreads = (target: string) => {
 			const growAmt: number = this.ns.getServerMaxMoney(target) / this.ns.getServerMoneyAvailable(target);
@@ -77,6 +80,7 @@ export class Batcher extends BaseServer {
 		let { growThreads, weakenThreads } = preparePrepThreads(target);
 		const growRatio: number = growThreads / (growThreads + weakenThreads);
 		const weakenRatio: number = weakenThreads / (growThreads + weakenThreads);
+		const serverList: string[] = this.recursiveScan();
 		for (const server of serverList) {
 			const availableRam: number = this.ns.getServerMaxRam(server) - this.ns.getServerUsedRam(server);
 			const availableThreads: number = Math.floor(availableRam / ramPerThread);
@@ -93,7 +97,10 @@ export class Batcher extends BaseServer {
 		}
 	}
 	async runBatch(target: string, reservedRam: number): Promise<void> {
-		const serverList: string[] = this.recursiveScan();
+		this.logger.info(`Running batch on ${target} with ${reservedRam} GB of Reserved RAM`);
+		try {
+			this.root();
+		} catch {}
 		const timeToWeaken: number = this.ns.getWeakenTime(target);
 		let delay: number = 0;
 		const hackDelayTime: number = Math.floor(timeToWeaken - this.ns.getHackTime(target));
@@ -112,6 +119,7 @@ export class Batcher extends BaseServer {
 			});
 			return;
 		}
+		const serverList: string[] = this.recursiveScan();
 		for (const server of serverList) {
 			let availableRam: number =
 				Math.floor(this.ns.getServerMaxRam(server)) - Math.floor(this.ns.getServerUsedRam(server));
@@ -142,8 +150,8 @@ export class Batcher extends BaseServer {
 				this.ns.exec(this.workers.weaken, server, weakenThreads, weakenThreads, delay + 200, target);
 			}
 		}
-		this.logger.debug('Server Information Pre-Allocation => ', serverInfoPre);
-		this.logger.debug('Server Information Post-Allocation => ', serverInfoPost);
+		//this.logger.debug('Server Information Pre-Allocation => ', serverInfoPre);
+		//this.logger.debug('Server Information Post-Allocation => ', serverInfoPost);
 		await this.ns.sleep(timeToWeaken + delay + 2000);
 		return;
 	}

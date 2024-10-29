@@ -4,16 +4,11 @@ Things to work on for the `bitburner-scripts` repo.
 
 ## Todo
 
-### Batcher
-
+- [ ] Fix the multiplier system.
 - [ ] Optimize/simplify the `batching` algorithm more.
-- [ ] Re-write `loop.ts` so that it works for early-game play.
-
-### Maybe BatchManager.ts?
-
-- [ ] Allow `Batcher`/`Manager` to upgrade/purchase new p-servers.
-- [ ] Allow `Batcher`/`Manager` to purchase Hack Programs (Ex. BruteSSH.exe)
-  - [ ] Have the `Batcher`/`Manager` script purchase `Formulas.exe` automatically.
+- [ ] Obtain `Formulas.exe`
+  - [ ] Allow `Batcher`/`Manager` to purchase Hack Programs (Ex. BruteSSH.exe)
+    - [ ] Have the `Batcher`/`Manager` script purchase `Formulas.exe` automatically.
 
 ## In Progress
 
@@ -27,3 +22,5 @@ Things to work on for the `bitburner-scripts` repo.
   - [x] Finish `serverManager`
 - [x] Implement method for `Batcher` to auto-root servers, so it can be a set-and-forget.
   - [x] Optimize/simplify the `batching` algorithm.
+- [x] Allow `Batcher`/`Manager` to upgrade/purchase new p-servers.
+- [x] Re-write `loop.ts` so that it works for early-game play. #RIP
