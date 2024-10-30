@@ -73,7 +73,14 @@ export class Logger {
 	 */
 	protected ts() {
 		const today: Date = new Date();
-		return `> ${today.getFullYear()}-${today.getMonth()}-${today.getDay()} ${today.getHours()}:${today.getMinutes()}:${today.getSeconds()}.${today.getMilliseconds()} - `;
+		const year: string = today.getFullYear().toString().padStart(4, '0');
+		const month: string = `${today.getMonth() + 1}`.toString().padStart(2, '0');
+		const day: string = today.getDate().toString().padStart(2, '0');
+		const hour: string = today.getHours().toString().padStart(2, '0');
+		const minute: string = today.getMinutes().toString().padStart(2, '0');
+		const second: string = today.getSeconds().toString().padStart(2, '0');
+		const millis: string = today.getMilliseconds().toString().padStart(3, '0');
+		return `> ${year}-${month}-${day} ${hour}:${minute}:${second}.${millis} - `;
 	}
 	protected msg(level: LogLevel, _msg: string) {
 		const logTsFormat = this.ts();

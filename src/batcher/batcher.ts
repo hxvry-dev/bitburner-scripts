@@ -21,7 +21,7 @@ export class Batcher extends BaseServer {
 
 		this.root();
 		this.copy(this.workers.all);
-		this.marginForError = 1.01;
+		this.marginForError = 1.1;
 		this.hackPercent = 0.25;
 	}
 	protected prepareBatchThreads(target: string): BatchThreads {

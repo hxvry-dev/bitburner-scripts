@@ -36,6 +36,12 @@ export class BaseServer {
 			'getServerSecurityLevel',
 			'getServerMaxMoney',
 			'getServerMoneyAvailable',
+			'brutessh',
+			'ftpcrack',
+			'relaysmtp',
+			'httpworm',
+			'sqlinject',
+			'nuke',
 		];
 		killLogs.forEach((log) => {
 			this.ns.disableLog(log);
