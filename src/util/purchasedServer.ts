@@ -7,7 +7,6 @@ export class PServer extends BaseServer {
 	protected logger: Logger;
 	protected maxRam: number;
 	protected mult: number;
-	protected isFull: boolean;
 	protected workers: BatchScriptBundle;
 	pServerList: string[];
 	constructor(ns: NS) {
@@ -24,9 +23,12 @@ export class PServer extends BaseServer {
 		this.pServerList = this.ns
 			.getPurchasedServers()
 			.sort((a, b) => this.ns.getServerMaxRam(a) - this.ns.getServerMaxRam(b));
-		this.isFull = this.pServerList.length === this.ns.getPurchasedServerLimit();
 		this.maxRam = Math.pow(2, 20);
 	}
+	/**
+	 *
+	 * @returns The name of the newly purchased p-server
+	 */
 	protected generateServerName() {
 		const chars: string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
 		const length: number = 5;
@@ -36,21 +38,63 @@ export class PServer extends BaseServer {
 		}
 		return result;
 	}
+	/**
+	 *
+	 * @returns The amount of RAM
+	 */
 	protected calcRam(): number {
 		let ram: number = Math.min(this.maxRam, Math.pow(2, this.mult));
 		const potentialMaxRam: number = this.pServerList.reduce<number>(
 			(a, e) => Math.max(a, this.ns.getServerMaxRam(e)),
 			3,
 		);
-		while (ram < potentialMaxRam) this.mult++;
+		while (ram < potentialMaxRam) {
+			ram = Math.min(this.maxRam, Math.pow(2, this.mult));
+			this.mult++;
+		}
 		return ram;
 	}
-	protected async purchase(ram: number): Promise<void> {
-		const cost: number = this.ns.getPurchasedServerCost(ram);
+	/**
+	 * Loop for upgrading p-servers
+	 */
+	protected upgradeAll(): void {
+		const ram: number = this.calcRam();
 		let cash: number = this.ns.getServerMoneyAvailable('home');
-		if (this.pServerList.length < this.ns.getPurchasedServerLimit()) {
-			if (cost <= cash) {
-				while (cash > cost) {
+
+		/**
+		 * It's always good to upgrade, rather than delete and re-buy p-servers
+		 * So, we check to see if the purchased server limit has been hit
+		 */
+		if (this.pServerList.length === this.ns.getPurchasedServerLimit()) {
+			for (const server of this.pServerList) {
+				if (ram <= this.ns.getServerMaxRam(server)) {
+					// Bump the multiplier so we can upgrade servers
+					this.mult += 1;
+					// Get the new RAM amount once we've incremented the multiplier
+					const newRam: number = this.calcRam();
+					const cost: number = this.ns.getPurchasedServerUpgradeCost(server, newRam);
+					if (cost <= cash) {
+						this.ns.upgradePurchasedServer(server, newRam);
+						this.logger.info(
+							`Purchased Server (Hostname: ${server}) was successfully upgraded to ${newRam} GB of RAM for ${Intl.NumberFormat(
+								'en-US',
+								{
+									style: 'currency',
+									currency: 'USD',
+								},
+							).format(cost)}`,
+						);
+						// Remove the cash that was spent to buy/upgrade servers from our local tally
+						cash -= cost;
+					}
+				}
+			}
+		} else {
+			/** The purchased server list was NOT full, so we just buy an 8GB server, and move on */
+			const cost: number = this.ns.getPurchasedServerCost(ram);
+			let cash: number = this.ns.getServerMoneyAvailable('home');
+			while (cost <= cash) {
+				if (this.pServerList.length < this.ns.getPurchasedServerLimit() && cost <= cash) {
 					const name: string = `pserv-${this.generateServerName()}`;
 					this.ns.purchaseServer(name, ram);
 					this.logger.info(
@@ -59,63 +103,22 @@ export class PServer extends BaseServer {
 							currency: 'USD',
 						}).format(cost)}`,
 					);
-					this.copy(this.workers.all);
+					// Make sure we re-set the pServerList, because we've added to it
 					this.pServerList = this.ns
 						.getPurchasedServers()
 						.sort((a, b) => this.ns.getServerMaxRam(a) - this.ns.getServerMaxRam(b));
+					// We need to make sure the newly purchased server has access to the required payloads
+					this.copy(this.workers.all);
+					// Remove the cash that was spent to buy/upgrade servers from our local tally
 					cash -= cost;
-					await this.ns.sleep(10);
 				}
 			}
 		}
 	}
-	protected async upgradeAll(): Promise<void> {
-		let ram: number = this.calcRam();
-		this.pServerList = this.ns
-			.getPurchasedServers()
-			.sort((a, b) => this.ns.getServerMaxRam(a) - this.ns.getServerMaxRam(b));
-		if (this.isFull) {
-			for (const server of this.pServerList) {
-				const cost: number = this.ns.getPurchasedServerUpgradeCost(server, ram);
-				const cash: number = this.ns.getServerMoneyAvailable('home');
-				if (cost <= cash && ram <= this.ns.getServerMaxRam(server)) {
-					this.mult += 1;
-					ram = Math.min(this.maxRam, Math.pow(2, this.mult));
-					this.ns.upgradePurchasedServer(server, ram);
-					this.logger.info(
-						`Purchased Server (Hostname: ${server}) successfully upgraded to ${ram} GB of RAM for ${Intl.NumberFormat(
-							'en-US',
-							{
-								style: 'currency',
-								currency: 'USD',
-							},
-						).format(cost)}`,
-					);
-					this.pServerList = this.ns
-						.getPurchasedServers()
-						.sort((a, b) => this.ns.getServerMaxRam(a) - this.ns.getServerMaxRam(b));
-				} else {
-					this.ns.upgradePurchasedServer(server, ram);
-					this.copy(this.workers.all);
-					this.logger.info(
-						`Purchased Server (Hostname: ${server}) successfully upgraded to ${ram} GB of RAM for ${Intl.NumberFormat(
-							'en-US',
-							{
-								style: 'currency',
-								currency: 'USD',
-							},
-						).format(cost)}`,
-					);
-					this.pServerList = this.ns
-						.getPurchasedServers()
-						.sort((a, b) => this.ns.getServerMaxRam(a) - this.ns.getServerMaxRam(b));
-				}
-			}
-		} else {
-			return await this.purchase(ram);
-		}
-	}
-	async run(): Promise<void> {
-		return await this.upgradeAll();
+	/**
+	 * Shell for upgradeAll
+	 */
+	run(): void {
+		this.upgradeAll();
 	}
 }
