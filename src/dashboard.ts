@@ -19,12 +19,22 @@ export async function main(ns: NS): Promise<void> {
 	ns.moveTail(700, 0, ns.pid);
 
 	try {
+		pid = ns.run('util/heartbeat.js', 1);
+		ns.tail(pid);
+		ns.resizeTail(250, 250, pid);
+		ns.moveTail(450, 0, pid);
+		logger.info(`Heartbeat started successfully! PID: ${pid}`);
+	} catch {
+		logger.error(`Could not start heartbeat.js!`);
+	}
+
+	try {
 		pid = ns.run('batcher/batchLoop.js', 1, hostname, reservedRam);
 		ns.tail(pid);
 		ns.resizeTail(1250, 250, pid);
 		ns.moveTail(700, 250, pid);
 		logger.info(`BatchLoop spun up successfully! PID: ${pid}`);
-	} catch (e) {
+	} catch {
 		logger.error(`Could not start batchLoop.js!`);
 	}
 
