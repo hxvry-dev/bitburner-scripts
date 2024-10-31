@@ -30,9 +30,6 @@ export async function main(ns: NS): Promise<void> {
 
 	try {
 		pid = ns.run('batcher/batchLoop.js', 1, hostname, reservedRam);
-		ns.tail(pid);
-		ns.resizeTail(1250, 250, pid);
-		ns.moveTail(700, 250, pid);
 		logger.info(`BatchLoop spun up successfully! PID: ${pid}`);
 	} catch {
 		logger.error(`Could not start batchLoop.js!`);
@@ -44,6 +41,6 @@ export async function main(ns: NS): Promise<void> {
 			const data = port.read();
 			ns.print(data);
 		}
-		await ns.sleep(10);
+		await ns.sleep(1);
 	}
 }
