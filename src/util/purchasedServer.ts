@@ -57,7 +57,7 @@ export class PServer extends BaseServer {
 	/**
 	 * Loop for upgrading p-servers
 	 */
-	protected upgradeAll(): void {
+	protected async upgradeAll(): Promise<void> {
 		const ram: number = this.calcRam();
 		let cash: number = this.ns.getServerMoneyAvailable('home');
 
@@ -93,32 +93,33 @@ export class PServer extends BaseServer {
 			/** The purchased server list was NOT full, so we just buy an 8GB server, and move on */
 			const cost: number = this.ns.getPurchasedServerCost(ram);
 			let cash: number = this.ns.getServerMoneyAvailable('home');
-			while (cost <= cash) {
-				if (this.pServerList.length < this.ns.getPurchasedServerLimit() && cost <= cash) {
+			if (this.pServerList.length < this.ns.getPurchasedServerLimit() && cost <= cash) {
+				while (cost < cash) {
 					const name: string = `pserv-${this.generateServerName()}`;
 					this.ns.purchaseServer(name, ram);
+					await this.ns.sleep(100);
 					this.logger.info(
 						`Purchased Server (Hostname: ${name}) with ${ram} GB of RAM for ${Intl.NumberFormat('en-US', {
 							style: 'currency',
 							currency: 'USD',
 						}).format(cost)}`,
 					);
-					// Make sure we re-set the pServerList, because we've added to it
-					this.pServerList = this.ns
-						.getPurchasedServers()
-						.sort((a, b) => this.ns.getServerMaxRam(a) - this.ns.getServerMaxRam(b));
-					// We need to make sure the newly purchased server has access to the required payloads
-					this.copy(this.workers.all);
 					// Remove the cash that was spent to buy/upgrade servers from our local tally
 					cash -= cost;
 				}
+				// Make sure we re-set the pServerList, because we've added to it
+				this.pServerList = this.ns
+					.getPurchasedServers()
+					.sort((a, b) => this.ns.getServerMaxRam(a) - this.ns.getServerMaxRam(b));
+				// We need to make sure the newly purchased server has access to the required payloads
+				this.copy(this.workers.all);
 			}
 		}
 	}
 	/**
 	 * Shell for upgradeAll
 	 */
-	run(): void {
-		this.upgradeAll();
+	async run(): Promise<void> {
+		await this.upgradeAll();
 	}
 }
