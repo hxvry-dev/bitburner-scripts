@@ -98,9 +98,8 @@ export class Batcher extends BaseServer {
 	}
 	async runBatch(target: string, reservedRam: number): Promise<void> {
 		this.logger.info(`Running batch on ${target} with ${reservedRam} GB of Reserved RAM`);
-		try {
-			this.root();
-		} catch {}
+		this.root();
+		this.copy(this.workers.all);
 		const timeToWeaken: number = this.ns.getWeakenTime(target);
 		let delay: number = 0;
 		const hackDelayTime: number = Math.floor(timeToWeaken - this.ns.getHackTime(target));

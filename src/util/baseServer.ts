@@ -29,7 +29,6 @@ export class BaseServer {
 			'sleep',
 			'exec',
 			'getHackingLevel',
-			'killall',
 			'getServerMaxRam',
 			'getServerUsedRam',
 			'getServerMinSecurityLevel',
@@ -90,68 +89,63 @@ export class BaseServer {
 	 * Attempts to gain root/adminstrator permissions on the target server.
 	 */
 	protected root(): void {
-		const serverList: string[] = this.recursiveScan();
-		for (const server of serverList) {
-			let openPorts: number = 0;
-			if (this.data.hasAdminRights) {
-				return;
-			}
-			try {
+		let openPorts: number = 0;
+		for (const server of this.serverList) {
+			if (server !== 'home') {
+				try {
+					this.ns.nuke(server);
+				} catch {}
 				if (this.ns.fileExists('brutessh.exe', 'home')) {
-					this.ns.brutessh(server);
-					openPorts += 1;
+					if (!this.data.sshPortOpen) {
+						this.ns.brutessh(server);
+						openPorts += 1;
+						try {
+							this.ns.nuke(server);
+							this.copy(this.workers.all);
+						} catch {}
+					}
 				}
 				if (this.ns.fileExists('ftpcrack.exe', 'home')) {
-					this.ns.ftpcrack(server);
-					openPorts += 1;
+					if (!this.data.ftpPortOpen) {
+						this.ns.ftpcrack(server);
+						openPorts += 1;
+						try {
+							this.ns.nuke(server);
+							this.copy(this.workers.all);
+						} catch {}
+					}
 				}
 				if (this.ns.fileExists('relaysmtp.exe', 'home')) {
-					this.ns.relaysmtp(server);
-					openPorts += 1;
+					if (!this.data.smtpPortOpen) {
+						this.ns.relaysmtp(server);
+						openPorts += 1;
+						try {
+							this.ns.nuke(server);
+							this.copy(this.workers.all);
+						} catch {}
+					}
 				}
 				if (this.ns.fileExists('httpworm.exe', 'home')) {
-					this.ns.httpworm(server);
-					openPorts += 1;
+					if (!this.data.httpPortOpen) {
+						this.ns.httpworm(server);
+						openPorts += 1;
+						try {
+							this.ns.nuke(server);
+							this.copy(this.workers.all);
+						} catch {}
+					}
 				}
 				if (this.ns.fileExists('sqlinject.exe', 'home')) {
-					this.ns.sqlinject(server);
-					openPorts += 1;
-				}
-				if (this.data.numOpenPortsRequired! <= openPorts) {
-					this.ns.nuke(server);
-					this.ns.scp(
-						[
-							'batcher/payloads/batchGrow.js',
-							'batcher/payloads/batchHack.js',
-							'batcher/payloads/batchWeaken.js',
-						],
-						server,
-						'home',
-					);
-				}
-			} catch {}
-		}
-	}
-	/**
-	 * Attempts to force kill any/all scripts running on the target server.
-	 */
-	protected killAll(): void {
-		const servers: string[] = this.recursiveScan();
-		let killedScripts: number = 0;
-		servers.forEach((target) => {
-			if (target !== 'home') {
-				const serverKilled: boolean = this.ns.killall(target);
-				if (serverKilled) {
-					killedScripts++;
+					if (!this.data.sqlPortOpen) {
+						this.ns.sqlinject(server);
+						openPorts += 1;
+						try {
+							this.ns.nuke(server);
+							this.copy(this.workers.all);
+						} catch {}
+					}
 				}
 			}
-		});
-
-		if (killedScripts == 0) {
-			this.logger.warn(`Nothing to kill. Aborting...`);
-			return;
-		} else {
-			this.logger.info(`# Killed Scripts This Run: ${killedScripts}`);
 		}
 	}
 }

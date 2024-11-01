@@ -81,7 +81,7 @@ export class PServer extends BaseServer {
 			.getPurchasedServers()
 			.sort((a, b) => this.ns.getServerMaxRam(a) - this.ns.getServerMaxRam(b));
 		let ramToPurchase: number = this.calcMaxRam();
-		const isFull: boolean = this.pServerList.length == this.ns.getPurchasedServerLimit();
+		const isFull: boolean = this.pServerList.length === this.ns.getPurchasedServerLimit();
 
 		// If the purchased server list is full, we can only upgrade
 		if (isFull) {
@@ -144,9 +144,10 @@ export class PServer extends BaseServer {
 			// The purchased server list is not full, so we can purchase bulk 8GB at cost to fill the list.
 			let cashOnHand: number = this.ns.getServerMoneyAvailable('home');
 			const cost: number = this.ns.getPurchasedServerCost(8); // 440,000
-			while (cost <= cashOnHand) {
+			while (cost <= cashOnHand && !isFull) {
 				const name: string = `pserv-${this.generateServerName()}`;
 				this.ns.purchaseServer(name, 8);
+				this.copy(this.workers.all);
 				await this.ns.sleep(100);
 				this.logger.info(
 					`Purchased Server (Hostname: ${name}) with 8 GB of RAM for ${Intl.NumberFormat('en-US', {
