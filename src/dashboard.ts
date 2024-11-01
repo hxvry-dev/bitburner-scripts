@@ -18,17 +18,7 @@ export async function main(ns: NS): Promise<void> {
 	ns.resizeTail(1250, 250, ns.pid);
 	ns.moveTail(700, 0, ns.pid);
 
-	if (!ns.scriptRunning('batchLoop.js', 'home')) {
-		try {
-			pid = ns.run('util/heartbeat.js', 1);
-			ns.tail(pid);
-			ns.resizeTail(250, 250, pid);
-			ns.moveTail(450, 0, pid);
-			logger.info(`Heartbeat started successfully! PID: ${pid}`);
-		} catch {
-			logger.error(`Could not start heartbeat.js!`);
-		}
-
+	if (!ns.scriptRunning('batcher/batchLoop.js', 'home')) {
 		try {
 			pid = ns.run('batcher/batchLoop.js', 1, hostname, reservedRam);
 			logger.info(`BatchLoop spun up successfully! PID: ${pid}`);
