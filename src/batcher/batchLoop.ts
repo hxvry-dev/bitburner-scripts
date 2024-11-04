@@ -10,12 +10,6 @@ export async function main(ns: NS): Promise<void> {
 	const logger: Logger = new Logger(ns, 'batchLoop');
 	const batcher: Batcher = new Batcher(ns, target);
 	const pServer: PServer = new PServer(ns);
-	logger.logToTerm(
-		batcher
-			.pathToServer('run4theh111z')
-			.map((server) => `connect ${server}`)
-			.join('; '),
-	);
 	while (true) {
 		if (!ns.scriptRunning('dashboard.js', 'home')) return;
 		await pServer.run();
