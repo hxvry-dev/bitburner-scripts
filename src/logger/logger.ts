@@ -1,6 +1,6 @@
 import { NetscriptPort, NS } from '@ns';
 
-type LogLevel = 'INFO' | 'WARN' | 'ERROR' | 'DEBUG' | 'EPOCH';
+type LogLevel = 'INFO' | 'WARN' | 'ERROR' | 'DEBUG' | 'TERM';
 export class Logger {
 	public logPort: number;
 	protected ns: NS;
@@ -60,6 +60,10 @@ export class Logger {
 				color = this.colors.CYAN;
 				break;
 			}
+			case 'term': {
+				color = this.colors.MAGENTA;
+				break;
+			}
 			default: {
 				color = this.colors.DEFAULT_GREEN;
 				break;
@@ -71,7 +75,7 @@ export class Logger {
 	 *
 	 * @returns Generated timestamp and UNIX timestamp for logging purposes.
 	 */
-	protected ts() {
+	protected ts(): string {
 		const today: Date = new Date();
 		const year: string = today.getFullYear().toString().padStart(4, '0');
 		const month: string = `${today.getMonth() + 1}`.toString().padStart(2, '0');
@@ -82,7 +86,7 @@ export class Logger {
 		const millis: string = today.getMilliseconds().toString().padStart(3, '0');
 		return `> ${year}-${month}-${day} ${hour}:${minute}:${second}.${millis} - `;
 	}
-	protected msg(level: LogLevel, _msg: string) {
+	protected msg(level: LogLevel, _msg: string): string {
 		const logTsFormat = this.ts();
 
 		const logTsFormatStr: string = `${this.colors.GREY}${logTsFormat}`;
@@ -93,7 +97,7 @@ export class Logger {
 
 		return `${logTsFormatStr}${logLevelFormatStr}${logNameFormatStr}${ptrFormatStr}${logMsgFormatStr}${this.colors.RESET}`;
 	}
-	protected log(level: LogLevel, msg: string, args: Array<object | string>): void {
+	protected log(level: LogLevel, msg: string, args: Array<object | string>, term: boolean = false): void {
 		const port: NetscriptPort = this.ns.getPortHandle(this.logPort);
 		for (let i = 0; i < args.length; i++) {
 			if (!Array.isArray(args[i])) {
@@ -104,7 +108,11 @@ export class Logger {
 			msg = `${msg}\n${args[i]}`;
 		}
 		const data: string = this.msg(level, msg);
-		port.tryWrite(data);
+		if (!term) {
+			port.tryWrite(data);
+		} else {
+			return this.ns.tprint(data);
+		}
 	}
 	info(msg: string, ...args: Array<object | string>): void {
 		this.log('INFO', msg, args);
@@ -117,5 +125,8 @@ export class Logger {
 	}
 	debug(msg: string, ...args: Array<object | string>): void {
 		this.log('DEBUG', msg, args);
+	}
+	logToTerm(msg: string, ...args: Array<object | string>): void {
+		this.log('TERM', `${this.colors.SLATE_BLUE}${msg}${this.colors.RESET}`, args, true);
 	}
 }
