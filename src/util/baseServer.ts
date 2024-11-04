@@ -50,7 +50,7 @@ export class BaseServer {
 	/**
 	 * @returns An array of all server hostnames.
 	 */
-	protected recursiveScan(debug?: boolean): string[] {
+	protected recursiveScan(debug?: boolean): Array<string> {
 		const visited: Set<string> = new Set<string>();
 		const queue: string[] = ['home'];
 		const servers: string[] = [];
@@ -147,25 +147,5 @@ export class BaseServer {
 				}
 			}
 		}
-	}
-	pathToServer(target: string): string[] {
-		const serversToVisit: string[] = ['home'];
-		const visitedServers: Set<string> = new Set(serversToVisit);
-		const paths: { [key: string]: string[] } = { home: [] };
-		while (serversToVisit.length > 0) {
-			const current: string = serversToVisit.shift() as string;
-			const neighbors: string[] = this.ns.scan(current);
-			for (const server of neighbors) {
-				if (!visitedServers.has(server)) {
-					visitedServers.add(server);
-					serversToVisit.push(server);
-					paths[server] = [...paths[current], server];
-					if (server === target) {
-						return paths[server];
-					}
-				}
-			}
-		}
-		return [];
 	}
 }
