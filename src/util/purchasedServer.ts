@@ -87,6 +87,7 @@ export class PServer extends BaseServer {
 		if (isFull) {
 			// Upgrade server
 			for (const server of this.pServerList) {
+				if (this.ns.getServerMaxRam(server) >= this.maxRam) return;
 				let cashOnHand: number = this.ns.getServerMoneyAvailable('home');
 				// Calculate the baseline cost of upgrading the server
 				let cost: number = this.ns.getPurchasedServerUpgradeCost(server, ramToPurchase);

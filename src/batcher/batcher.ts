@@ -22,7 +22,7 @@ export class Batcher extends BaseServer {
 		this.root();
 		this.copy(this.workers.all);
 		this.marginForError = 1.1;
-		this.hackPercent = 0.25;
+		this.hackPercent = 0.95;
 	}
 	protected prepareBatchThreads(target: string): BatchThreads {
 		const moneyPerHack: number = this.ns.getServerMaxMoney(target) * this.hackPercent;
@@ -106,8 +106,6 @@ export class Batcher extends BaseServer {
 		const growDelayTime: number = Math.floor(timeToWeaken - this.ns.getGrowTime(target));
 		const ramPerThread: number = this.ns.getScriptRam(this.workers.grow, 'home');
 		const { hackThreads, w1Threads, growThreads, w2Threads, totalThreads } = this.prepareBatchThreads(target);
-		const serverInfoPre: Array<object> = [];
-		const serverInfoPost: Array<object> = [];
 		if (w1Threads == 0 || w2Threads == 0 || growThreads == 0 || hackThreads == 0) {
 			this.logger.error('Could not spin up batch due to error in thread allocation!', {
 				hackThreads,
@@ -123,14 +121,58 @@ export class Batcher extends BaseServer {
 			let availableRam: number =
 				Math.floor(this.ns.getServerMaxRam(server)) - Math.floor(this.ns.getServerUsedRam(server));
 			if (server == 'home') availableRam -= reservedRam;
-			const availableThreads: number = Math.floor(availableRam / ramPerThread);
-			serverInfoPre.push({ server: server, availableRam: availableRam, availableThreads: availableThreads });
-			const cycles: number = Math.floor(availableThreads / totalThreads);
+			const availableThreads: number = Math.floor(availableRam / ramPerThread); // Total number of threads available on this server
+			const cycles: number = Math.floor(availableThreads / totalThreads!);
+			let totalBatchThreads: BatchThreads = {
+				hackThreads: 0,
+				w1Threads: 0,
+				growThreads: 0,
+				w2Threads: 0,
+			};
 			for (let i = 0; i < Math.min(cycles, 10000); i++) {
-				this.ns.exec(this.workers.hack, server, hackThreads, hackThreads, hackDelayTime + delay, target);
-				this.ns.exec(this.workers.weaken, server, w1Threads, w1Threads, delay, target);
-				this.ns.exec(this.workers.grow, server, growThreads, growThreads, growDelayTime + delay, target);
-				this.ns.exec(this.workers.weaken, server, w2Threads, w2Threads, 3 + delay, target);
+				totalBatchThreads.growThreads += growThreads;
+				totalBatchThreads.hackThreads += hackThreads;
+				totalBatchThreads.w1Threads += w1Threads;
+				totalBatchThreads.w2Threads += w2Threads;
+			}
+			totalBatchThreads.totalThreads =
+				totalBatchThreads.growThreads +
+				totalBatchThreads.hackThreads +
+				totalBatchThreads.w1Threads +
+				totalBatchThreads.w2Threads;
+			if (totalBatchThreads.totalThreads != 0) {
+				this.ns.exec(
+					this.workers.hack,
+					server,
+					totalBatchThreads.hackThreads,
+					totalBatchThreads.hackThreads,
+					hackDelayTime + delay,
+					target,
+				);
+				this.ns.exec(
+					this.workers.weaken,
+					server,
+					totalBatchThreads.w1Threads,
+					totalBatchThreads.w1Threads,
+					delay,
+					target,
+				);
+				this.ns.exec(
+					this.workers.grow,
+					server,
+					totalBatchThreads.growThreads,
+					totalBatchThreads.growThreads,
+					growDelayTime + delay,
+					target,
+				);
+				this.ns.exec(
+					this.workers.weaken,
+					server,
+					totalBatchThreads.w2Threads,
+					totalBatchThreads.w2Threads,
+					3 + delay,
+					target,
+				);
 				delay += 4;
 			}
 		}
@@ -139,7 +181,6 @@ export class Batcher extends BaseServer {
 				Math.floor(this.ns.getServerMaxRam(server)) - Math.floor(this.ns.getServerUsedRam(server));
 			if (server == 'home') availableRam -= reservedRam;
 			const availableThreads: number = Math.floor(availableRam / ramPerThread);
-			serverInfoPost.push({ server: server, availableRam: availableRam, availableThreads: availableThreads });
 			const growThreads: number = Math.floor(availableThreads / 2);
 			const weakenThreads: number = Math.ceil(availableThreads / 2);
 			if (growThreads > 0) {
@@ -149,8 +190,6 @@ export class Batcher extends BaseServer {
 				this.ns.exec(this.workers.weaken, server, weakenThreads, weakenThreads, delay + 200, target);
 			}
 		}
-		//this.logger.debug('Server Information Pre-Allocation => ', serverInfoPre);
-		//this.logger.debug('Server Information Post-Allocation => ', serverInfoPost);
 		await this.ns.sleep(timeToWeaken + delay + 2000);
 		return;
 	}

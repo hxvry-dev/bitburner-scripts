@@ -9,7 +9,7 @@ export type BatchThreads = {
 	w1Threads: number;
 	w2Threads: number;
 	growThreads: number;
-	totalThreads: number;
+	totalThreads?: number;
 };
 export type PrepThreads = {
 	growThreads: number;
