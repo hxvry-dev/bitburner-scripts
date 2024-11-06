@@ -68,7 +68,7 @@ export class Batcher extends BaseServer {
 		this.logger.info(`Prepping target: ${target}`);
 		const ramPerThread: number = this.ns.getScriptRam(this.workers.grow, 'home');
 		const preparePrepThreads = (target: string) => {
-			const growAmt: number = this.ns.getServerMaxMoney(target) / this.ns.getServerMoneyAvailable(target);
+			const growAmt: number = this.ns.getServerMaxMoney(target) / (this.ns.getServerMoneyAvailable(target) || 1);
 			const growThreads: number = Math.ceil(this.ns.growthAnalyze(target, growAmt));
 			const securityChangePerGrow: number = this.ns.growthAnalyzeSecurity(growThreads);
 			// Distance to minimum security level, in terms of weaken threads.
