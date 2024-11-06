@@ -22,7 +22,7 @@ export class Batcher extends BaseServer {
 		this.root();
 		this.copy(this.workers.all);
 		this.marginForError = 1.1;
-		this.hackPercent = 0.95;
+		this.hackPercent = 0.25;
 	}
 	protected prepareBatchThreads(target: string): BatchThreads {
 		const moneyPerHack: number = this.ns.getServerMaxMoney(target) * this.hackPercent;
