@@ -13,11 +13,34 @@ export class WaterfallHack {
 	constructor(ns: NS) {
 		this.ns = ns;
 		this.hackScripts = {
-			hack: 'payloads/_hack.js',
-			grow: 'payloads/_grow.js',
-			weaken: 'payloads/_weaken.js',
-			all: ['payloads/_hack.js', 'payloads/_grow.js', 'payloads/_weaken.js'],
+			hack: 'proto/payloads/_hack.js',
+			grow: 'proto/payloads/_grow.js',
+			weaken: 'proto/payloads/_weaken.js',
+			all: ['proto/payloads/_hack.js', 'proto/payloads/_grow.js', 'proto/payloads/_weaken.js'],
 		};
+		const killLogs: string[] = [
+			'scan',
+			'sleep',
+			'exec',
+			'getHackingLevel',
+			'getServerMaxRam',
+			'getServerUsedRam',
+			'getServerMinSecurityLevel',
+			'getServerSecurityLevel',
+			'getServerMaxMoney',
+			'getServerMoneyAvailable',
+			'getServerNumPortsRequired',
+			'brutessh',
+			'ftpcrack',
+			'relaysmtp',
+			'httpworm',
+			'sqlinject',
+			'nuke',
+		];
+		killLogs.forEach((log) => {
+			this.ns.disableLog(log);
+		});
+		ns.clearLog();
 	}
 	/**
 	 * Attempts to gain root/adminstrator permissions on the target server.
@@ -35,7 +58,12 @@ export class WaterfallHack {
 			case 1:
 				if (this.ns.fileExists('BruteSSH.exe')) this.ns.brutessh(host);
 			case 0:
-				this.ns.nuke(host);
+				try {
+					this.ns.nuke(host);
+					this.copy(this.hackScripts.all);
+				} catch {}
+			default:
+				break;
 		}
 	}
 	/**
@@ -77,6 +105,9 @@ export class WaterfallHack {
 	isMinSec(hostname: string): boolean {
 		return this.ns.getServerSecurityLevel(hostname) === this.ns.getServerMinSecurityLevel(hostname);
 	}
+	isMaxMoney(hostname: string): boolean {
+		return this.ns.getServerMoneyAvailable(hostname) === this.ns.getServerMaxMoney(hostname);
+	}
 }
 
 export async function main(ns: NS) {
@@ -84,13 +115,25 @@ export async function main(ns: NS) {
 	while (true) {
 		const serverList: string[] = hacker.recursiveScan();
 		for (const server of serverList) {
-			const numThreads: number = Math.floor(
-				(ns.getServerMaxRam(server) - ns.getServerUsedRam(server)) / ns.getScriptRam(hacker.hackScripts.weaken),
-			);
-			hacker.root(server);
-			hacker.copy(hacker.hackScripts.all);
-			if (!hacker.isMinSec(server)) {
-				ns.exec(hacker.hackScripts.weaken, server);
+			if (ns.hasRootAccess(server)) {
+				let numThreads: number = Math.floor(
+					ns.getServerMaxRam(server) / ns.getScriptRam(hacker.hackScripts.weaken),
+				);
+				if (server === 'home') {
+					numThreads = Math.floor(
+						ns.getServerMaxRam(server) / ns.getScriptRam(hacker.hackScripts.weaken) -
+							ns.getScriptRam('proto/init.js', 'home'),
+					);
+				}
+				if (!hacker.isMinSec(server)) {
+					if (numThreads > 0) ns.exec(hacker.hackScripts.weaken, server, numThreads, 'n00dles', numThreads);
+				} else if (!hacker.isMaxMoney(server)) {
+					if (numThreads > 0) ns.exec(hacker.hackScripts.grow, server, numThreads, 'n00dles', numThreads);
+				} else {
+					if (numThreads > 0) ns.exec(hacker.hackScripts.hack, server, numThreads, 'n00dles', numThreads);
+				}
+			} else {
+				hacker.root(server);
 			}
 		}
 		await ns.sleep(100);
