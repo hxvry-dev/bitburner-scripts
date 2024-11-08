@@ -193,4 +193,7 @@ export class Batcher extends BaseServer {
 		await this.ns.sleep(timeToWeaken + delay + 2000);
 		return;
 	}
+	get listOfServers() {
+		return this.recursiveScan();
+	}
 }

@@ -16,6 +16,13 @@ export async function main(ns: NS): Promise<void> {
 			.map((server) => `connect ${server}`)
 			.join('; '),
 	);
+	logger.logToTerm(
+		batcher
+			.pathToServer('w0r1d_d43m0n')
+			.map((server) => `connect ${server}`)
+			.join('; '),
+	);
+	logger.logToTerm('List of Servers', batcher.listOfServers);
 	while (true) {
 		if (!ns.scriptRunning('dashboard.js', 'home')) return;
 		await pServer.run();
