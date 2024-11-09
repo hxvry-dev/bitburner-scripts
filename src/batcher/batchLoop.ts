@@ -4,12 +4,13 @@ import { Logger } from '../logger/logger';
 import { PServer } from '@/util/purchasedServer';
 
 export async function main(ns: NS): Promise<void> {
-	const target: string = (ns.args[0] as string) ?? 'n00dles';
-	const reservedRam: number = (ns.args[1] as number) ?? 20;
-
 	const logger: Logger = new Logger(ns, 'batchLoop');
-	const batcher: Batcher = new Batcher(ns, target);
+	const batcher: Batcher = new Batcher(ns);
 	const pServer: PServer = new PServer(ns);
+
+	const target: string = (ns.args[1] as string) ?? batcher.findTarget();
+	const reservedRam: number = (ns.args[0] as number) ?? 10;
+
 	logger.logToTerm(
 		batcher
 			.pathToServer('run4theh111z')
