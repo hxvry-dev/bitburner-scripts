@@ -48,7 +48,7 @@ export class BaseServer {
 	/**
 	 * @returns An array of all server hostnames.
 	 */
-	protected recursiveScan(debug?: boolean): string[] {
+	protected recursiveScan(debug?: boolean, target?: string): string[] {
 		const visited: Set<string> = new Set<string>();
 		const queue: string[] = ['home'];
 		const servers: string[] = [];
