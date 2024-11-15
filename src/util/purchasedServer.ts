@@ -104,13 +104,10 @@ export class PServer extends BaseServer {
 						// Upgrade the p-server
 						this.ns.upgradePurchasedServer(server, ramToPurchase);
 						this.logger.info(
-							`Purchased Server (Hostname: ${server}) was successfully upgraded to ${ramToPurchase} GB of RAM for ${Intl.NumberFormat(
-								'en-US',
-								{
-									style: 'currency',
-									currency: 'USD',
-								},
-							).format(cost)}`,
+							`Upgraded Server ${server} to ${ramToPurchase} GB of RAM for ${Intl.NumberFormat('en-US', {
+								style: 'currency',
+								currency: 'USD',
+							}).format(cost)}`,
 						);
 					} else {
 						continue;
@@ -128,13 +125,10 @@ export class PServer extends BaseServer {
 						// Upgrade the p-server
 						this.ns.upgradePurchasedServer(server, newRam);
 						this.logger.info(
-							`Purchased Server (Hostname: ${server}) was successfully upgraded to ${ramToPurchase} GB of RAM for ${Intl.NumberFormat(
-								'en-US',
-								{
-									style: 'currency',
-									currency: 'USD',
-								},
-							).format(cost)}`,
+							`Upgraded Server ${server} to ${ramToPurchase} GB of RAM for ${Intl.NumberFormat('en-US', {
+								style: 'currency',
+								currency: 'USD',
+							}).format(cost)}`,
 						);
 					} else {
 						continue;
@@ -151,7 +145,7 @@ export class PServer extends BaseServer {
 				this.copy(this.workers.all);
 				await this.ns.sleep(100);
 				this.logger.info(
-					`Purchased Server (Hostname: ${name}) with 8 GB of RAM for ${Intl.NumberFormat('en-US', {
+					`Purchased Server ${name} to ${ramToPurchase} GB of RAM for ${Intl.NumberFormat('en-US', {
 						style: 'currency',
 						currency: 'USD',
 					}).format(cost)}`,
