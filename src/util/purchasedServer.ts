@@ -22,7 +22,7 @@ export class PServer extends BaseServer {
 		this.mult = 3;
 		this.pServerList = this.ns
 			.getPurchasedServers()
-			.sort((a, b) => this.ns.getServerMaxRam(a) - this.ns.getServerMaxRam(b));
+			.sort((a, b) => this.ns.getServerMaxRam(b) - this.ns.getServerMaxRam(a));
 		this.maxRam = Math.pow(2, 20);
 	}
 	/**
@@ -79,7 +79,7 @@ export class PServer extends BaseServer {
 	protected async upgrade(): Promise<void> {
 		this.pServerList = this.ns
 			.getPurchasedServers()
-			.sort((a, b) => this.ns.getServerMaxRam(a) - this.ns.getServerMaxRam(b));
+			.sort((a, b) => this.ns.getServerMaxRam(b) - this.ns.getServerMaxRam(a));
 		let ramToPurchase: number = this.calcMaxRam();
 		const isFull: boolean = this.pServerList.length === this.ns.getPurchasedServerLimit();
 
@@ -142,7 +142,7 @@ export class PServer extends BaseServer {
 			while (cost <= cashOnHand && !isFull) {
 				this.pServerList = this.ns
 					.getPurchasedServers()
-					.sort((a, b) => this.ns.getServerMaxRam(a) - this.ns.getServerMaxRam(b));
+					.sort((a, b) => this.ns.getServerMaxRam(b) - this.ns.getServerMaxRam(a));
 				if (this.pServerList.length === this.ns.getPurchasedServerLimit()) return;
 				const name: string = `pserv-${this.generateServerName()}`;
 				this.ns.purchaseServer(name, 8);

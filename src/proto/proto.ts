@@ -7,7 +7,7 @@ export class WaterfallHack extends BaseServer {
 	workers: BatchScriptBundle;
 	constructor(ns: NS) {
 		super(ns);
-		this.serverList = this.recursiveScan().sort((a, b) => this.ns.getServerMaxRam(a) - this.ns.getServerMaxRam(b));
+		this.serverList = this.recursiveScan().sort((a, b) => this.ns.getServerMaxRam(b) - this.ns.getServerMaxRam(a));
 		this.workers = {
 			hack: 'proto/payloads/_hack.js',
 			grow: 'proto/payloads/_grow.js',
