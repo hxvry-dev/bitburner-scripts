@@ -21,3 +21,15 @@ export type BatchWorkerScript = {
 	weaken: string;
 	all: string[];
 };
+
+export type LogLevel = 'INFO' | 'WARN' | 'ERROR' | 'DEBUG' | 'TERM';
+
+export type LogTime = {
+	year: string;
+	month: string;
+	day: string;
+	hour: string;
+	minute: string;
+	second: string;
+	millis?: string;
+};

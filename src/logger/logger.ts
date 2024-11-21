@@ -1,16 +1,5 @@
+import { LogTime, LogLevel } from '@/util/types';
 import { NetscriptPort, NS } from '@ns';
-
-type LogLevel = 'INFO' | 'WARN' | 'ERROR' | 'DEBUG' | 'TERM';
-
-type LogTime = {
-	year: string;
-	month: string;
-	day: string;
-	hour: string;
-	minute: string;
-	second: string;
-	millis?: string;
-};
 export class Logger {
 	public logPort: number;
 	protected ns: NS;
