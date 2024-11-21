@@ -19,18 +19,17 @@ export class TopStats extends BaseServer {
 		return this.servers;
 	}
 	generateProgressBar(value: number, size: number = 26): string {
-		const percentage: number = value / 100;
-		const prog: number = Math.round(size * percentage);
+		const prog: number = Math.round(size * value);
 		const emptyProg: number = size - prog;
 		const progText = '▇'.repeat(prog);
 		const emptyProgText: string = '—'.repeat(emptyProg);
-		const percentText: string = Math.round(percentage * 100) + `%`;
+		const percentText: string = Math.round(value * 100) + `%`;
 		const bar: string = `[${progText}${emptyProgText}] ${percentText}`;
 		return bar;
 	}
 	genBlock(servers: Server[]): void {
 		servers.forEach((s) => {
-			const progBar: string = this.generateProgressBar(Math.round(s.ramUsed / s.maxRam));
+			const progBar: string = this.generateProgressBar(s.ramUsed / s.maxRam);
 			this.ns.tprint(`
 ${`―`.repeat(60)}―
 │ Server Max RAM: ${s.maxRam} GB${` `.repeat(60 - `│ Server Max RAM: ${s.maxRam} GB`.length)}│
