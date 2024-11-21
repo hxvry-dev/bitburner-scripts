@@ -86,7 +86,7 @@ export class BaseServer {
 	/**
 	 * Attempts to gain root/adminstrator permissions on the target server.
 	 */
-	root(): void {
+	protected root(): void {
 		for (const server of this.serverList) {
 			switch (this.ns.getServerNumPortsRequired(server)) {
 				case 5:
