@@ -1,6 +1,16 @@
 import { NetscriptPort, NS } from '@ns';
 
 type LogLevel = 'INFO' | 'WARN' | 'ERROR' | 'DEBUG' | 'TERM';
+
+type LogTime = {
+	year: string;
+	month: string;
+	day: string;
+	hour: string;
+	minute: string;
+	second: string;
+	millis?: string;
+};
 export class Logger {
 	public logPort: number;
 	protected ns: NS;
@@ -16,7 +26,7 @@ export class Logger {
 		this._epoch = Date.now().toString();
 		return `${this.colors.CYAN}${this._epoch}${this.colors.RESET}`;
 	}
-	protected colors = {
+	colors = {
 		BLACK: '\u001b[30m',
 		WHITE: '\u001B[37m',
 		RED: '\u001B[31m',
@@ -32,20 +42,32 @@ export class Logger {
 		RED_BG: '\x1b[41m',
 		RESET: '\u001B[0m',
 	};
-	/**
-	 *
-	 * @param level The log level to add color to
-	 *
-	 * Level corresponds to the {@link colors} object.
-	 * @returns A formatted string containing the log level with the designated color applied, depending on the level
-	 *
-	 * Example: {red_background}[ERROR]{color_reset}
-	 */
+	protected ts(): LogTime {
+		const today: Date = new Date();
+		const year: string = today.getFullYear().toString().padStart(4, '0');
+		const month: string = `${today.getMonth() + 1}`.toString().padStart(2, '0');
+		const day: string = today.getDate().toString().padStart(2, '0');
+		const hour: string = today.getHours().toString().padStart(2, '0');
+		const minute: string = today.getMinutes().toString().padStart(2, '0');
+		const second: string = today.getSeconds().toString().padStart(2, '0');
+		const millis: string = today.getMilliseconds().toString().padStart(3, '0');
+		const timestamp: LogTime = {
+			year: year,
+			month: month,
+			day: day,
+			hour: hour,
+			minute: minute,
+			second: second,
+			millis: millis,
+		};
+		return timestamp as LogTime;
+	}
 	protected colorByLevel(level: string): string {
-		let color: string = '';
+		level = level.toLowerCase();
+		let color = '';
 		switch (level) {
 			case 'info': {
-				color = this.colors.BLUE;
+				color = this.colors.SLATE_BLUE;
 				break;
 			}
 			case 'warn': {
@@ -57,45 +79,15 @@ export class Logger {
 				break;
 			}
 			case 'debug': {
-				color = this.colors.CYAN;
+				color = this.colors.GREY;
 				break;
 			}
 			case 'term': {
 				color = this.colors.MAGENTA;
 				break;
 			}
-			default: {
-				color = this.colors.DEFAULT_GREEN;
-				break;
-			}
 		}
 		return color;
-	}
-	/**
-	 *
-	 * @returns Generated timestamp and UNIX timestamp for logging purposes.
-	 */
-	protected ts(): string {
-		const today: Date = new Date();
-		const year: string = today.getFullYear().toString().padStart(4, '0');
-		const month: string = `${today.getMonth() + 1}`.toString().padStart(2, '0');
-		const day: string = today.getDate().toString().padStart(2, '0');
-		const hour: string = today.getHours().toString().padStart(2, '0');
-		const minute: string = today.getMinutes().toString().padStart(2, '0');
-		const second: string = today.getSeconds().toString().padStart(2, '0');
-		const millis: string = today.getMilliseconds().toString().padStart(3, '0');
-		return `> ${year}-${month}-${day} ${hour}:${minute}:${second}.${millis} - `;
-	}
-	protected msg(level: LogLevel, _msg: string): string {
-		const logTsFormat = this.ts();
-
-		const logTsFormatStr: string = `${this.colors.GREY}${logTsFormat}`;
-		const logLevelFormatStr: string = `${this.colorByLevel(level.toLowerCase())}[${level}]`;
-		const logNameFormatStr: string = this.name?.length ? ` ${this.colors.YELLOW}(${this.name})` : ``;
-		const logMsgFormatStr: string = ` ${this.colors.WHITE}${_msg}`;
-		const ptrFormatStr: string = `${this.colors.WHITE}> `;
-
-		return `${logTsFormatStr}${logLevelFormatStr}${logNameFormatStr}${ptrFormatStr}${logMsgFormatStr}${this.colors.RESET}`;
 	}
 	protected log(level: LogLevel, msg: string, args: Array<object | string>, term: boolean = false): void {
 		const port: NetscriptPort = this.ns.getPortHandle(this.logPort);
@@ -107,7 +99,14 @@ export class Logger {
 			}
 			msg = `${msg}\n${args[i]}`;
 		}
-		const data: string = this.msg(level, msg);
+		const { year, month, day, hour, minute, second, millis } = this.ts();
+		const tsFormat: string = `${this.colors.GREY}${month}/${day}/${year}${this.colors.RESET} ${this.colors.GREEN}|${this.colors.RESET} ${this.colors.GREY}${hour}:${minute}:${second}.${millis}${this.colors.RESET}`;
+		// 2024-11-19 13:23:36.378 - [INFO] (Batcher)>  Running batch on n00dles with 10 GB of Reserved RAM
+		const data: string = `${tsFormat} - ${this.colorByLevel(level)}[${level}]${this.colors.RESET} ${
+			this.colors.YELLOW
+		}(${this.name?.length ? this.name : ''})${this.colors.RESET}${this.colors.GREY}>${this.colors.RESET} ${
+			this.colors.WHITE
+		}${msg}${this.colors.RESET}`;
 		if (!term) {
 			port.tryWrite(data);
 		} else {
