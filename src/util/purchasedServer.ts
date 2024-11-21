@@ -140,12 +140,16 @@ export class PServer extends BaseServer {
 			let cashOnHand: number = this.ns.getServerMoneyAvailable('home');
 			const cost: number = this.ns.getPurchasedServerCost(8); // 440,000
 			while (cost <= cashOnHand && !isFull) {
+				this.pServerList = this.ns
+					.getPurchasedServers()
+					.sort((a, b) => this.ns.getServerMaxRam(a) - this.ns.getServerMaxRam(b));
+				if (this.pServerList.length === this.ns.getPurchasedServerLimit()) return;
 				const name: string = `pserv-${this.generateServerName()}`;
 				this.ns.purchaseServer(name, 8);
 				this.copy(this.workers.all);
 				await this.ns.sleep(100);
 				this.logger.info(
-					`Purchased Server ${name} to ${ramToPurchase} GB of RAM for ${Intl.NumberFormat('en-US', {
+					`Purchased Server ${name} with ${ramToPurchase} GB of RAM for ${Intl.NumberFormat('en-US', {
 						style: 'currency',
 						currency: 'USD',
 					}).format(cost)}`,
