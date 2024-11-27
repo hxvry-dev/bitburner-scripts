@@ -4,6 +4,7 @@ import { LogLevel } from '@/util/types';
 
 export class Logger {
 	logPort: number;
+	epoch: string;
 	protected name?: string;
 	protected colors: TermColors;
 	protected ns: NS;
@@ -24,6 +25,7 @@ export class Logger {
 			DEFAULT_GREEN: '\x1b[38;5;40m',
 			RESET: '\u001B[0m',
 		};
+		this.epoch = Date.now().toString();
 	}
 	protected ts(): string {
 		const today: Date = new Date();
