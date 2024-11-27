@@ -119,7 +119,7 @@ export class Batcher extends BaseServer {
 				Math.floor(this.ns.getServerMaxRam(server)) - Math.floor(this.ns.getServerUsedRam(server));
 			if (server == 'home') availableRam -= reservedRam;
 			const availableThreads: number = Math.floor(availableRam / ramPerThread); // Total number of threads available on this server
-			const cycles: number = Math.floor(availableThreads / totalThreads!);
+			const cycles: number = Math.floor(totalThreads! / availableThreads);
 			for (let i = 0; i < Math.min(cycles, 2500); i++) {
 				this.ns.exec(this.workers.hack, server, hackThreads, hackThreads, hackDelayTime + delay, target);
 				this.ns.exec(this.workers.weaken, server, w1Threads, w1Threads, delay, target);
