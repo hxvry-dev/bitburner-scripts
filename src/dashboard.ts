@@ -27,6 +27,15 @@ export async function main(ns: NS): Promise<void> {
 		}
 	}
 
+	if (!ns.scriptRunning('util/topStats.js', 'home') && ns.getServerMaxRam('home') > Math.pow(2, 6)) {
+		try {
+			pid = ns.run('util/topStats.js', 1);
+			logger.info(`TopStats spun up successfully! PID: ${pid}`);
+		} catch {
+			logger.error(`Could not start topStats.js!`);
+		}
+	}
+
 	while (true) {
 		const port: NetscriptPort = ns.getPortHandle(logger.logPort);
 		while (!port.empty()) {

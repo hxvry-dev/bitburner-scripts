@@ -3,19 +3,15 @@ import { NS, Server } from '@ns';
 import { BatchScriptBundle } from '@/util/types';
 
 export class BaseServer {
-	protected hostname: string;
 	protected ns: NS;
 	protected logger: Logger;
-	protected data: Server;
 	protected workers: BatchScriptBundle;
-	protected hackPrograms: string[];
 	protected serverList: string[];
-	constructor(ns: NS, hostname?: string) {
+	protected score: number;
+	protected bestTarget: string;
+	constructor(ns: NS) {
 		this.ns = ns;
 		this.logger = new Logger(ns, 'baseServerV2');
-		this.hostname = hostname ? hostname : this.ns.getHostname();
-		this.data = this.ns.getServer(this.hostname);
-		this.hackPrograms = ['BruteSSH.exe', 'FTPCrack.exe', 'relaySMTP.exe', 'HTTPWorm.exe', 'SQLInject.exe'];
 		this.workers = {
 			hack: '',
 			grow: '',
@@ -23,6 +19,8 @@ export class BaseServer {
 			all: [],
 		};
 		this.serverList = this.recursiveScan();
+		this.score = 0;
+		this.bestTarget = '';
 
 		const killLogs: string[] = [
 			'scan',
@@ -50,7 +48,7 @@ export class BaseServer {
 	/**
 	 * @returns An array of all server hostnames.
 	 */
-	protected recursiveScan(debug?: boolean): string[] {
+	protected recursiveScan(debug?: boolean, target?: string): string[] {
 		const visited: Set<string> = new Set<string>();
 		const queue: string[] = ['home'];
 		const servers: string[] = [];
@@ -89,62 +87,25 @@ export class BaseServer {
 	 * Attempts to gain root/adminstrator permissions on the target server.
 	 */
 	protected root(): void {
-		let openPorts: number = 0;
 		for (const server of this.serverList) {
-			if (server !== 'home') {
-				try {
-					this.ns.nuke(server);
-				} catch {}
-				if (this.ns.fileExists('brutessh.exe', 'home')) {
-					if (!this.data.sshPortOpen) {
-						this.ns.brutessh(server);
-						openPorts += 1;
-						try {
-							this.ns.nuke(server);
-							this.copy(this.workers.all);
-						} catch {}
-					}
-				}
-				if (this.ns.fileExists('ftpcrack.exe', 'home')) {
-					if (!this.data.ftpPortOpen) {
-						this.ns.ftpcrack(server);
-						openPorts += 1;
-						try {
-							this.ns.nuke(server);
-							this.copy(this.workers.all);
-						} catch {}
-					}
-				}
-				if (this.ns.fileExists('relaysmtp.exe', 'home')) {
-					if (!this.data.smtpPortOpen) {
-						this.ns.relaysmtp(server);
-						openPorts += 1;
-						try {
-							this.ns.nuke(server);
-							this.copy(this.workers.all);
-						} catch {}
-					}
-				}
-				if (this.ns.fileExists('httpworm.exe', 'home')) {
-					if (!this.data.httpPortOpen) {
-						this.ns.httpworm(server);
-						openPorts += 1;
-						try {
-							this.ns.nuke(server);
-							this.copy(this.workers.all);
-						} catch {}
-					}
-				}
-				if (this.ns.fileExists('sqlinject.exe', 'home')) {
-					if (!this.data.sqlPortOpen) {
-						this.ns.sqlinject(server);
-						openPorts += 1;
-						try {
-							this.ns.nuke(server);
-							this.copy(this.workers.all);
-						} catch {}
-					}
-				}
+			switch (this.ns.getServerNumPortsRequired(server)) {
+				case 5:
+					if (this.ns.fileExists('SQLInject.exe')) this.ns.sqlinject(server);
+				case 4:
+					if (this.ns.fileExists('HTTPWorm.exe')) this.ns.httpworm(server);
+				case 3:
+					if (this.ns.fileExists('relaySMTP.exe')) this.ns.relaysmtp(server);
+				case 2:
+					if (this.ns.fileExists('FTPCrack.exe')) this.ns.ftpcrack(server);
+				case 1:
+					if (this.ns.fileExists('BruteSSH.exe')) this.ns.brutessh(server);
+				case 0:
+					try {
+						this.ns.nuke(server);
+						this.copy(this.workers.all);
+					} catch {}
+				default:
+					break;
 			}
 		}
 	}
@@ -167,5 +128,25 @@ export class BaseServer {
 			}
 		}
 		return [];
+	}
+	findTarget(): string {
+		let bestScore: number = 0;
+		const calculateScore = (server: string) => {
+			const maxMoney: number = this.ns.getServerMaxMoney(server);
+			const minSec: number = this.ns.getServerMinSecurityLevel(server);
+			const weakenTime: number = this.ns.getWeakenTime(server);
+			const hackTime: number = this.ns.getHackTime(server);
+			return maxMoney / (minSec * (hackTime + weakenTime));
+		};
+		this.serverList.forEach((server) => {
+			if (this.ns.hasRootAccess(server) && this.ns.getServerMaxMoney(server) > 0) {
+				const score: number = calculateScore(server);
+				if (score > bestScore) {
+					bestScore = score;
+					this.bestTarget = server;
+				}
+			}
+		});
+		return this.bestTarget;
 	}
 }

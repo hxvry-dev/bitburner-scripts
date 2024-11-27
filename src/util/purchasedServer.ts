@@ -22,7 +22,7 @@ export class PServer extends BaseServer {
 		this.mult = 3;
 		this.pServerList = this.ns
 			.getPurchasedServers()
-			.sort((a, b) => this.ns.getServerMaxRam(a) - this.ns.getServerMaxRam(b));
+			.sort((a, b) => this.ns.getServerMaxRam(b) - this.ns.getServerMaxRam(a));
 		this.maxRam = Math.pow(2, 20);
 	}
 	/**
@@ -79,7 +79,7 @@ export class PServer extends BaseServer {
 	protected async upgrade(): Promise<void> {
 		this.pServerList = this.ns
 			.getPurchasedServers()
-			.sort((a, b) => this.ns.getServerMaxRam(a) - this.ns.getServerMaxRam(b));
+			.sort((a, b) => this.ns.getServerMaxRam(b) - this.ns.getServerMaxRam(a));
 		let ramToPurchase: number = this.calcMaxRam();
 		const isFull: boolean = this.pServerList.length === this.ns.getPurchasedServerLimit();
 
@@ -104,13 +104,10 @@ export class PServer extends BaseServer {
 						// Upgrade the p-server
 						this.ns.upgradePurchasedServer(server, ramToPurchase);
 						this.logger.info(
-							`Purchased Server (Hostname: ${server}) was successfully upgraded to ${ramToPurchase} GB of RAM for ${Intl.NumberFormat(
-								'en-US',
-								{
-									style: 'currency',
-									currency: 'USD',
-								},
-							).format(cost)}`,
+							`Upgraded Server ${server} to ${ramToPurchase} GB of RAM for ${Intl.NumberFormat('en-US', {
+								style: 'currency',
+								currency: 'USD',
+							}).format(cost)}`,
 						);
 					} else {
 						continue;
@@ -128,13 +125,10 @@ export class PServer extends BaseServer {
 						// Upgrade the p-server
 						this.ns.upgradePurchasedServer(server, newRam);
 						this.logger.info(
-							`Purchased Server (Hostname: ${server}) was successfully upgraded to ${ramToPurchase} GB of RAM for ${Intl.NumberFormat(
-								'en-US',
-								{
-									style: 'currency',
-									currency: 'USD',
-								},
-							).format(cost)}`,
+							`Upgraded Server ${server} to ${ramToPurchase} GB of RAM for ${Intl.NumberFormat('en-US', {
+								style: 'currency',
+								currency: 'USD',
+							}).format(cost)}`,
 						);
 					} else {
 						continue;
@@ -146,12 +140,16 @@ export class PServer extends BaseServer {
 			let cashOnHand: number = this.ns.getServerMoneyAvailable('home');
 			const cost: number = this.ns.getPurchasedServerCost(8); // 440,000
 			while (cost <= cashOnHand && !isFull) {
+				this.pServerList = this.ns
+					.getPurchasedServers()
+					.sort((a, b) => this.ns.getServerMaxRam(b) - this.ns.getServerMaxRam(a));
+				if (this.pServerList.length === this.ns.getPurchasedServerLimit()) return;
 				const name: string = `pserv-${this.generateServerName()}`;
 				this.ns.purchaseServer(name, 8);
 				this.copy(this.workers.all);
 				await this.ns.sleep(100);
 				this.logger.info(
-					`Purchased Server (Hostname: ${name}) with 8 GB of RAM for ${Intl.NumberFormat('en-US', {
+					`Purchased Server ${name} with ${ramToPurchase} GB of RAM for ${Intl.NumberFormat('en-US', {
 						style: 'currency',
 						currency: 'USD',
 					}).format(cost)}`,

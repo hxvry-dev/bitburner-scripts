@@ -1,80 +1,32 @@
 import { NetscriptPort, NS } from '@ns';
+import { TermColors } from '@/util/types';
+import { LogLevel } from '@/util/types';
 
-type LogLevel = 'INFO' | 'WARN' | 'ERROR' | 'DEBUG' | 'TERM';
 export class Logger {
-	public logPort: number;
-	protected ns: NS;
+	logPort: number;
+	epoch: string;
 	protected name?: string;
-	protected _epoch: string;
-	constructor(ns: NS, logName: string = '') {
+	protected colors: TermColors;
+	protected ns: NS;
+	constructor(ns: NS, name: string) {
 		this.ns = ns;
-		this.logPort = 20;
-		this.name = logName ? logName : '';
-		this._epoch = '';
+		this.name = name;
+		this.logPort = 25;
+		this.colors = {
+			BLACK: '\u001b[30m',
+			WHITE: '\u001B[37m',
+			RED: '\u001B[31m',
+			GREEN: '\u001b[32m',
+			MAGENTA: '\u001b[35m',
+			CYAN: '\u001b[36m',
+			YELLOW: '\u001B[33m',
+			GREY: '\x1b[38;5;15m',
+			SLATE_BLUE: '\x1b[38;5;33m',
+			DEFAULT_GREEN: '\x1b[38;5;40m',
+			RESET: '\u001B[0m',
+		};
+		this.epoch = Date.now().toString();
 	}
-	get epoch() {
-		this._epoch = Date.now().toString();
-		return `${this.colors.CYAN}${this._epoch}${this.colors.RESET}`;
-	}
-	protected colors = {
-		BLACK: '\u001b[30m',
-		WHITE: '\u001B[37m',
-		RED: '\u001B[31m',
-		GREEN: '\u001b[32m',
-		MAGENTA: '\u001b[35m',
-		CYAN: '\u001b[36m',
-		YELLOW: '\u001B[33m',
-		BLUE: '\u001B[34m',
-		GREY: '\x1b[38;5;15m',
-		SLATE_BLUE: '\x1b[38;5;33m',
-		DEFAULT_GREEN: '\x1b[38;5;40m',
-		DARK_BROWN: '\x1b[38;5;100m',
-		RED_BG: '\x1b[41m',
-		RESET: '\u001B[0m',
-	};
-	/**
-	 *
-	 * @param level The log level to add color to
-	 *
-	 * Level corresponds to the {@link colors} object.
-	 * @returns A formatted string containing the log level with the designated color applied, depending on the level
-	 *
-	 * Example: {red_background}[ERROR]{color_reset}
-	 */
-	protected colorByLevel(level: string): string {
-		let color: string = '';
-		switch (level) {
-			case 'info': {
-				color = this.colors.BLUE;
-				break;
-			}
-			case 'warn': {
-				color = this.colors.YELLOW;
-				break;
-			}
-			case 'error': {
-				color = this.colors.RED;
-				break;
-			}
-			case 'debug': {
-				color = this.colors.CYAN;
-				break;
-			}
-			case 'term': {
-				color = this.colors.MAGENTA;
-				break;
-			}
-			default: {
-				color = this.colors.DEFAULT_GREEN;
-				break;
-			}
-		}
-		return color;
-	}
-	/**
-	 *
-	 * @returns Generated timestamp and UNIX timestamp for logging purposes.
-	 */
 	protected ts(): string {
 		const today: Date = new Date();
 		const year: string = today.getFullYear().toString().padStart(4, '0');
@@ -84,34 +36,62 @@ export class Logger {
 		const minute: string = today.getMinutes().toString().padStart(2, '0');
 		const second: string = today.getSeconds().toString().padStart(2, '0');
 		const millis: string = today.getMilliseconds().toString().padStart(3, '0');
-		return `> ${year}-${month}-${day} ${hour}:${minute}:${second}.${millis} - `;
-	}
-	protected msg(level: LogLevel, _msg: string): string {
-		const logTsFormat = this.ts();
 
-		const logTsFormatStr: string = `${this.colors.GREY}${logTsFormat}`;
-		const logLevelFormatStr: string = `${this.colorByLevel(level.toLowerCase())}[${level}]`;
-		const logNameFormatStr: string = this.name?.length ? ` ${this.colors.YELLOW}(${this.name})` : ``;
-		const logMsgFormatStr: string = ` ${this.colors.WHITE}${_msg}`;
-		const ptrFormatStr: string = `${this.colors.WHITE}> `;
-
-		return `${logTsFormatStr}${logLevelFormatStr}${logNameFormatStr}${ptrFormatStr}${logMsgFormatStr}${this.colors.RESET}`;
+		const prefix: string = `${this.colors.WHITE}${month}/${day}/${year}${this.colors.RESET}${this.colors.GREEN} │ ${this.colors.RESET}${this.colors.WHITE}${hour}:${minute}:${second}.${millis} ― ${this.colors.RESET}`;
+		return prefix;
 	}
-	protected log(level: LogLevel, msg: string, args: Array<object | string>, term: boolean = false): void {
-		const port: NetscriptPort = this.ns.getPortHandle(this.logPort);
+	protected createLogMessage(level: LogLevel, msg: string, args: Array<object | string>): string {
+		let levelColor: string = '';
+		let logColor: string = '';
+		const logName: string = ` ${this.colors.YELLOW}(${this.name})${this.colors.RESET}`;
+		switch (level) {
+			case 'INFO':
+				levelColor = this.colors.DEFAULT_GREEN;
+				logColor = this.colors.WHITE;
+				break;
+			case 'WARN':
+				levelColor = this.colors.YELLOW;
+				logColor = this.colors.WHITE;
+				break;
+			case 'ERROR':
+				levelColor = this.colors.RED;
+				logColor = this.colors.WHITE;
+				break;
+			case 'TERM':
+				levelColor = this.colors.GREEN;
+				logColor = this.colors.GREEN;
+				break;
+			case 'DEBUG':
+				levelColor = this.colors.MAGENTA;
+				logColor = this.colors.GREY;
+				break;
+			default:
+				levelColor = this.colors.DEFAULT_GREEN;
+				logColor = this.colors.DEFAULT_GREEN;
+				break;
+		}
+		const prefix: string = `${this.ts()}${levelColor}[${level}]${this.colors.RESET}${logName}>`;
 		for (let i = 0; i < args.length; i++) {
 			if (!Array.isArray(args[i])) {
-				args[i] = `${this.colors.SLATE_BLUE}${JSON.stringify(args[i], null, 4)}`;
+				args[i] = `${JSON.stringify(args[i], null, 2)}`;
 			} else {
-				args[i] = `${this.colors.SLATE_BLUE}${JSON.stringify(args[i], null, 2)}`;
+				args[i] = `${JSON.stringify(args[i], null, 4)}`;
 			}
-			msg = `${msg}\n${args[i]}`;
+			msg = `${levelColor}${msg}${this.colors.RESET}\n${logColor}${args[i]}${this.colors.RESET}`;
 		}
-		const data: string = this.msg(level, msg);
-		if (!term) {
-			port.tryWrite(data);
+		if (args.length == 0) {
+			msg = `${levelColor}${msg}${this.colors.RESET}`;
+		}
+		const _msg: string = `${prefix} ${msg}`;
+		return _msg;
+	}
+	protected log(level: LogLevel, msg: string, args: Array<object | string>, toTerm: boolean = false): void {
+		const port: NetscriptPort = this.ns.getPortHandle(this.logPort);
+		const payload: string = this.createLogMessage(level, msg, args);
+		if (!toTerm) {
+			port.tryWrite(payload);
 		} else {
-			return this.ns.tprint(data);
+			return this.ns.tprint(payload);
 		}
 	}
 	info(msg: string, ...args: Array<object | string>): void {
@@ -126,7 +106,7 @@ export class Logger {
 	debug(msg: string, ...args: Array<object | string>): void {
 		this.log('DEBUG', msg, args);
 	}
-	logToTerm(msg: string, ...args: Array<object | string>): void {
-		this.log('TERM', `${this.colors.SLATE_BLUE}${msg}${this.colors.RESET}`, args, true);
+	term(msg: string, ...args: Array<object | string>): void {
+		this.log('TERM', msg, args, true);
 	}
 }

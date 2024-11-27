@@ -9,8 +9,8 @@ export class Batcher extends BaseServer {
 
 	protected marginForError: number;
 	protected hackPercent: number;
-	constructor(ns: NS, hostname?: string) {
-		super(ns, hostname);
+	constructor(ns: NS) {
+		super(ns);
 		this.workers = {
 			hack: 'batcher/payloads/batchHack.js',
 			grow: 'batcher/payloads/batchGrow.js',
@@ -56,13 +56,10 @@ export class Batcher extends BaseServer {
 	 * @returns True if this server's security is at the lowest possible value, and that the money available is equal to the maximum money available on the server. False otherwise.
 	 */
 	isPrepped(target: string): boolean {
-		if (
+		return (
 			this.ns.getServerMinSecurityLevel(target) == this.ns.getServerSecurityLevel(target) &&
 			this.ns.getServerMoneyAvailable(target) == this.ns.getServerMaxMoney(target)
-		) {
-			return true;
-		}
-		return false;
+		);
 	}
 	prepServer(target: string): void {
 		this.logger.info(`Prepping target: ${target}`);
@@ -122,57 +119,12 @@ export class Batcher extends BaseServer {
 				Math.floor(this.ns.getServerMaxRam(server)) - Math.floor(this.ns.getServerUsedRam(server));
 			if (server == 'home') availableRam -= reservedRam;
 			const availableThreads: number = Math.floor(availableRam / ramPerThread); // Total number of threads available on this server
-			const cycles: number = Math.floor(availableThreads / totalThreads!);
-			let totalBatchThreads: BatchThreads = {
-				hackThreads: 0,
-				w1Threads: 0,
-				growThreads: 0,
-				w2Threads: 0,
-			};
-			for (let i = 0; i < Math.min(cycles, 10000); i++) {
-				totalBatchThreads.growThreads += growThreads;
-				totalBatchThreads.hackThreads += hackThreads;
-				totalBatchThreads.w1Threads += w1Threads;
-				totalBatchThreads.w2Threads += w2Threads;
-			}
-			totalBatchThreads.totalThreads =
-				totalBatchThreads.growThreads +
-				totalBatchThreads.hackThreads +
-				totalBatchThreads.w1Threads +
-				totalBatchThreads.w2Threads;
-			if (totalBatchThreads.totalThreads != 0) {
-				this.ns.exec(
-					this.workers.hack,
-					server,
-					totalBatchThreads.hackThreads,
-					totalBatchThreads.hackThreads,
-					hackDelayTime + delay,
-					target,
-				);
-				this.ns.exec(
-					this.workers.weaken,
-					server,
-					totalBatchThreads.w1Threads,
-					totalBatchThreads.w1Threads,
-					delay,
-					target,
-				);
-				this.ns.exec(
-					this.workers.grow,
-					server,
-					totalBatchThreads.growThreads,
-					totalBatchThreads.growThreads,
-					growDelayTime + delay,
-					target,
-				);
-				this.ns.exec(
-					this.workers.weaken,
-					server,
-					totalBatchThreads.w2Threads,
-					totalBatchThreads.w2Threads,
-					3 + delay,
-					target,
-				);
+			const cycles: number = Math.floor(totalThreads! / availableThreads);
+			for (let i = 0; i < Math.min(cycles, 2500); i++) {
+				this.ns.exec(this.workers.hack, server, hackThreads, hackThreads, hackDelayTime + delay, target);
+				this.ns.exec(this.workers.weaken, server, w1Threads, w1Threads, delay, target);
+				this.ns.exec(this.workers.grow, server, growThreads, growThreads, growDelayTime + delay, target);
+				this.ns.exec(this.workers.weaken, server, w2Threads, w2Threads, 3 + delay, target);
 				delay += 4;
 			}
 		}
@@ -192,5 +144,8 @@ export class Batcher extends BaseServer {
 		}
 		await this.ns.sleep(timeToWeaken + delay + 2000);
 		return;
+	}
+	get listOfServers() {
+		return this.recursiveScan();
 	}
 }
