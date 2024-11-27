@@ -1,6 +1,7 @@
 import { Logger } from '@/logger/logger';
+import { Workers } from '@/util/types';
 import { NS } from '@ns';
-import { Workers } from './types';
+
 /** This baseServer implementation will minimize the RAM footprint */
 export class BaseServerV2 {
 	protected ns: NS;

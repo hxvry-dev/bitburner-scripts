@@ -1,3 +1,8 @@
+export type TermColors = {
+	[key: string]: string;
+};
+export type LogLevel = 'INFO' | 'WARN' | 'ERROR' | 'DEBUG' | 'TERM';
+
 export type BatchScriptBundle = {
 	hack: string;
 	grow: string;
@@ -22,14 +27,11 @@ export type BatchWorkerScript = {
 	all: string[];
 };
 
-export type LogLevel = 'INFO' | 'WARN' | 'ERROR' | 'DEBUG' | 'TERM';
+// V2 Batcher Types
 
-export type LogTime = {
-	year: string;
-	month: string;
-	day: string;
-	hour: string;
-	minute: string;
-	second: string;
-	millis?: string;
+export type Workers = {
+	hack: string;
+	grow: string;
+	weaken: string;
+	all: string[];
 };
