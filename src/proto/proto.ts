@@ -47,7 +47,7 @@ export class WaterfallHack extends BaseServer {
 		return this.ns.getServerMoneyAvailable(hostname) === this.ns.getServerMaxMoney(hostname);
 	}
 	_serverList(): string[] {
-		return this.serverList;
+		return this.recursiveScan().sort((a, b) => this.ns.getServerMaxRam(b) - this.ns.getServerMaxRam(a));
 	}
 }
 
