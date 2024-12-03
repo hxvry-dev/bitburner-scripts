@@ -1,7 +1,7 @@
 import { NS } from '@ns';
-import { BaseServer } from './baseServer';
+import { BaseServer } from '@/util/baseServer';
 import { Logger } from '@/logger/logger';
-import { BatchScriptBundle } from './types';
+import { BatchScriptBundle } from '@/util/types';
 
 export class PServer extends BaseServer {
 	protected logger: Logger;

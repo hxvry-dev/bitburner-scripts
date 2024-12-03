@@ -1,5 +1,5 @@
 import { NetscriptPort, NS } from '@ns';
-import { Logger } from './logger/logger';
+import { Logger } from '@/logger/logger';
 
 export async function main(ns: NS): Promise<void> {
 	let pid: number = 0;

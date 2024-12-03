@@ -1,5 +1,5 @@
 import { NS, Server } from '@ns';
-import { BaseServer } from './baseServer';
+import { BaseServer } from '@/util/baseServer';
 import { Logger } from '@/logger/logger';
 
 export class TopStats extends BaseServer {
