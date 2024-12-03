@@ -6,7 +6,7 @@ export async function main(ns: NS): Promise<void> {
 	const hostname: string = ns.args[0] as string;
 	const reservedRam: number = ns.args[1] as number;
 
-	const killLogs: string[] = ['sleep', 'run'];
+	const killLogs: string[] = ['sleep', 'run', 'getServerMaxRam'];
 	killLogs.forEach((log) => {
 		ns.disableLog(log);
 	});
