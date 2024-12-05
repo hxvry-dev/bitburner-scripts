@@ -5,8 +5,13 @@ export type Timings = {
 	delays: {
 		hDelay: number;
 		wDelay: number;
+		w2Delay: number;
 		gDelay: number;
 	};
 };
-
-export type JobTask = 'HACK' | 'GROW' | 'WEAKEN' | 'WEAKEN2' | 'init';
+export type BatchThreads = {
+	hThreads: number;
+	wThreads: number;
+	w2Threads: number;
+	gThreads: number;
+};
