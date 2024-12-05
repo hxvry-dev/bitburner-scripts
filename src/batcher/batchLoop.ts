@@ -12,19 +12,19 @@ export async function main(ns: NS): Promise<void> {
 	const reservedRam: number = (ns.args[1] as number) ?? 10;
 
 	/*
-	logger.logToTerm(
+	logger.term(
 		batcher
 			.pathToServer('run4theh111z')
 			.map((server) => `connect ${server}`)
 			.join('; '),
 	);
-	logger.logToTerm(
+	logger.term(
 		batcher
 			.pathToServer('w0r1d_d43m0n')
 			.map((server) => `connect ${server}`)
 			.join('; '),
 	);
-	logger.logToTerm('List of Servers', batcher.listOfServers);
+	logger.term('List of Servers', batcher.listOfServers);
 	*/
 	while (true) {
 		if (!ns.scriptRunning('dashboard.js', 'home')) return;
